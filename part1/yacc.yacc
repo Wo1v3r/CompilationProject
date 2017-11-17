@@ -35,36 +35,38 @@
 %left   NOT
 %%
 
-s:    
-      tree { printf("This is a tree\n"); printTree($1); freeTree($1); }
+s
+      : expr { printf("This is a tree\n"); printTree($1); freeTree($1); }
 
-tree:
-      comparison            |
-      arith                 |
-      LEFTPAR tree RIGHTPAR |
-      NOT tree { $$ = makeNode("!", $2, NULL); }
+// Recurse here on S >:
+// block
+//       : LEFTCURL expr RIGHTCURL { $$ = makeNode("{}",  $2, NULL); }
 
-comparison:
-      comparison AND comparison { $$ = makeNode("&&", $1, $3); }    |
-      comparison OR comparison  { $$ = makeNode("||", $1, $3); }    |
+expr
+      : LEFTPAR expr RIGHTPAR   { $$ = $2; }
+      | NOT  expr               { $$ = makeNode("!",  $2, NULL); }
+      | PIPE expr PIPE          { $$ = makeNode("abs", $2, NULL); }
+      | expr AND expr           { $$ = makeNode("&&", $1, $3); }        
+      | expr OR  expr           { $$ = makeNode("||", $1, $3); }        
+      | expr EQUALS  expr       { $$ = makeNode("==", $1, $3); }        
+      | expr GEQUALS expr       { $$ = makeNode(">=", $1, $3); }        
+      | expr LEQUALS expr       { $$ = makeNode("<=", $1, $3); }        
+      | expr GREATER expr       { $$ = makeNode(">",  $1, $3); }        
+      | expr LOWER   expr       { $$ = makeNode("<",  $1, $3); }        
+      | expr NEQUALS expr       { $$ = makeNode("!=", $1, $3); }        
+      | expr PLUS  expr         { $$ = makeNode("+", $1, $3); }         
+      | expr MINUS expr         { $$ = makeNode("-", $1, $3); }         
+      | expr MULT  expr         { $$ = makeNode("*", $1, $3); }         
+      | expr DIV   expr         { $$ = makeNode("/", $1, $3); }
 
-      arith EQUALS  arith       { $$ = makeNode("==", $1, $3); }    |
-      arith GEQUALS arith       { $$ = makeNode(">=", $1, $3); }    |
-      arith LEQUALS arith       { $$ = makeNode("<=", $1, $3); }    |
-      arith GREATER arith       { $$ = makeNode(">",  $1, $3); }    |
-      arith LOWER   arith       { $$ = makeNode("<",  $1, $3); }    |
-      arith NEQUALS arith       { $$ = makeNode("!=", $1, $3); }    |
-      arith
+      | ident ASSIGN expr       { $$ = makeNode("=", $1, $3); }
 
-arith:
-      NOT arith         { $$ = makeNode("!", $2, NULL);}         |
-      arith PLUS  arith { $$ = makeNode("+", $1, $3); }         |
-      arith MINUS arith { $$ = makeNode("-", $1, $3); }         |  
-      arith MULT  arith { $$ = makeNode("*", $1, $3); }         |
-      arith DIV   arith { $$ = makeNode("/", $1, $3); }         |
+      | NUM                     { $$ = makeNode(yytext,NULL,NULL); }  
+      | NULLVALUE               { $$ = makeNode(yytext,NULL,NULL); }
+      | ident                   { $$ = $1; }
 
-      NUM               { $$ = makeNode(yytext,NULL,NULL); }  |
-      IDENTIFIER        { $$ = makeNode(yytext,NULL,NULL); }
+ident
+      : IDENTIFIER              { $$ = makeNode(yytext,NULL,NULL); }
 
 %%
   node* makeNode(char* token, node* left, node* right) {
