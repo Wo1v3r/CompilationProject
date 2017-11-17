@@ -14,8 +14,19 @@
   #define YYSTYPE struct node*
 %}
 
-%token  NUM PLUS MINUS
-%left   PLUS MINUS
+%token  NUM NULLVALUE
+%token  MULT PLUS MINUS DIVIDE
+%token  POINTER REFERENCE ASSIGN
+%token  AND OR NOT
+%token  EQUALS GEQUALS LEQUALS GREATER LOWER NEQUALS
+%token  BOOL CHARP CHAR VOID INTP INT STRING
+%token  IF ELSE WHILE DO FOR RETURN
+%token  LEFTPAR LEFTBRAC LEFTCURL
+%token  RIGHTPAR RIGHTBRAC RIGHTCURL
+%token  COMMA SEMICOLON
+%token  PIPE
+
+%left   MULT PLUS MINUS DIVIDE
 %%
 
 s:    expr { printf("OK\n"); printTree($1); }
@@ -26,7 +37,7 @@ expr: expr PLUS expr { $$ = makeNode("+", $1, $3); } |
   node* makeNode(char* token, node* left, node* right) {
     node* newNode = (node*)malloc(sizeof(node));
     char* newStr = (char*)malloc(sizeof(token)+1);
-    strcpy(newstr,token);
+    strcpy(newStr,token);
     newNode -> left = left;
     newNode -> right = right;
     newNode -> token = newStr;
