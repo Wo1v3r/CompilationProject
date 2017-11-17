@@ -47,6 +47,7 @@ tree:
 comparison:
       comparison AND comparison { $$ = makeNode("&&", $1, $3); }    |
       comparison OR comparison  { $$ = makeNode("||", $1, $3); }    |
+
       arith EQUALS  arith       { $$ = makeNode("==", $1, $3); }    |
       arith GEQUALS arith       { $$ = makeNode(">=", $1, $3); }    |
       arith LEQUALS arith       { $$ = makeNode("<=", $1, $3); }    |

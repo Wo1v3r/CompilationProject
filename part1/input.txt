@@ -1,1 +1,1 @@
-(condition1 && !condition2)
+1 + 1 && 1
