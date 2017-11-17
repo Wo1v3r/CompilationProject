@@ -1,1 +1,1 @@
- lex lex.lex -o && yacc yacc.yacc && cc -o bin/compiler y.tab.c -ll
+ lex lex.lex && yacc yacc.yacc && cc -o compiler y.tab.c -ll
