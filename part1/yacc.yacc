@@ -37,6 +37,7 @@
 
 s
       : expr { printf("This is a tree\n"); printTree($1); freeTree($1); }
+      | s expr {$$=$1; printf("This is a tree\n"); printTree($2); freeTree($2); }
 
 // Recurse here on S >:
 // block

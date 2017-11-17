@@ -1,4 +1,2 @@
- if ( exp )
- { 
-   marina = 5951035920135 
-  }
+marina = 123
+svetlala = 25252
