@@ -1,0 +1,3 @@
+part1/lex.yy.c
+part1/y.tab.c
+part1/compiler
