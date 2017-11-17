@@ -1,9 +1,9 @@
 %%
-\*        return MULT;
-\+        return PLUS;
-\-        return MINUS;
-\/        return DIVIDE;
-\^        return POINTER;
+"*"        return MULT;
+"+"        return PLUS;
+"-"        return MINUS;
+"/"        return DIV;
+"^"        return POINTER;
 
 "&&"      return AND;
 "&"       return REFERENCE;

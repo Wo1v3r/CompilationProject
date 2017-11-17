@@ -1,1 +1,1 @@
-rm lex.yy.c y.tab.c a.out
+rm lex.yy.c y.tab.c compiler

@@ -1,1 +1,1 @@
-lex lex.lex && yacc yacc.yacc && cc y.tab.c -ll
+ lex lex.lex && yacc yacc.yacc && cc -o compiler y.tab.c -ll

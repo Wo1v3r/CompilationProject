@@ -15,7 +15,7 @@
 %}
 
 %token  NUM NULLVALUE
-%token  MULT PLUS MINUS DIVIDE
+%token  MULT PLUS MINUS DIV
 %token  POINTER REFERENCE ASSIGN
 %token  AND OR NOT
 %token  EQUALS GEQUALS LEQUALS GREATER LOWER NEQUALS
@@ -26,12 +26,18 @@
 %token  COMMA SEMICOLON
 %token  PIPE
 %token  IDENTIFIER
-%left   MULT PLUS MINUS DIVIDE
+%left   PLUS MINUS 
+%left   MULT DIV
 %%
 
 s:    expr { printf("OK\n"); printTree($1); }
-expr: expr PLUS expr { $$ = makeNode("+", $1, $3); } |
-      expr MINUS expr { $$ = makeNode('-', $1, $3); } |
+
+expr: 
+      expr PLUS expr { $$ = makeNode("+", $1, $3); } |
+      expr MINUS expr { $$ = makeNode("-", $1, $3); } | 
+      expr MULT expr { $$ = makeNode("*", $1, $3); } |
+      expr DIV expr { $$ = makeNode("/", $1, $3); } |
+
       NUM { $$ = makeNode(yytext,NULL,NULL); }
 %%
   node* makeNode(char* token, node* left, node* right) {
@@ -45,13 +51,23 @@ expr: expr PLUS expr { $$ = makeNode("+", $1, $3); } |
   }
 
   void printTree(node* tree) {
-    printf("%s\n", tree->token);
+    static count = 0;
+
+    count++;
     if (tree->left) {
       printTree(tree->left);
     }
+
+    for (int i = 0 ; i < count ; i++){
+      printf("\t");
+    }
+    printf("%s\n", tree->token);
+
     if (tree->right) {
       printTree(tree->right);
     }
+
+    count--;
   }
 
   int main() {
