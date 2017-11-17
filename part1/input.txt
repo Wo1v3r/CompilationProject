@@ -1,1 +1,1 @@
-int a;
+(condition1 && !condition2)

@@ -26,27 +26,44 @@
 %token  RIGHTPAR RIGHTBRAC RIGHTCURL
 %token  COMMA SEMICOLON
 %token  PIPE
-%token  IDENTIFIER WHITESPACE
+%token  IDENTIFIER
 
+%left   AND OR
+%left   EQUALS GEQUALS LEQUALS GREATER LOWER NEQUALS
 %left   PLUS MINUS 
 %left   MULT DIV
+%left   NOT
 %%
 
 s:    
-      tree  WHITESPACE s |
-      tree |
-      WHITESPACE {}
+      tree { printf("This is a tree\n"); printTree($1); freeTree($1); }
 
 tree:
-      arith { printf("Arithmetic\n"); printTree($1); freeTree($1); } 
+      comparison            |
+      arith                 |
+      LEFTPAR tree RIGHTPAR |
+      NOT tree { $$ = makeNode("!", $2, NULL); }
+
+comparison:
+      comparison AND comparison { $$ = makeNode("&&", $1, $3); }    |
+      comparison OR comparison  { $$ = makeNode("||", $1, $3); }    |
+      arith EQUALS  arith       { $$ = makeNode("==", $1, $3); }    |
+      arith GEQUALS arith       { $$ = makeNode(">=", $1, $3); }    |
+      arith LEQUALS arith       { $$ = makeNode("<=", $1, $3); }    |
+      arith GREATER arith       { $$ = makeNode(">",  $1, $3); }    |
+      arith LOWER   arith       { $$ = makeNode("<",  $1, $3); }    |
+      arith NEQUALS arith       { $$ = makeNode("!=", $1, $3); }    |
+      arith
 
 arith:
-      arith PLUS  arith { $$ = makeNode("+", $1, $3); } |
-      arith MINUS arith { $$ = makeNode("-", $1, $3); } | 
-      arith MULT  arith { $$ = makeNode("*", $1, $3); } |
-      arith DIV   arith { $$ = makeNode("/", $1, $3); } |
+      NOT arith         { $$ = makeNode("!", $2, NULL);}         |
+      arith PLUS  arith { $$ = makeNode("+", $1, $3); }         |
+      arith MINUS arith { $$ = makeNode("-", $1, $3); }         |  
+      arith MULT  arith { $$ = makeNode("*", $1, $3); }         |
+      arith DIV   arith { $$ = makeNode("/", $1, $3); }         |
 
-      NUM { $$ = makeNode(yytext,NULL,NULL); }
+      NUM               { $$ = makeNode(yytext,NULL,NULL); }  |
+      IDENTIFIER        { $$ = makeNode(yytext,NULL,NULL); }
 
 %%
   node* makeNode(char* token, node* left, node* right) {
@@ -79,6 +96,7 @@ arith:
     for (int i = 0 ; i < count ; i++){
       printf("\t");
     }
+
     printf("%s\n", tree->token);
 
     if (tree->right) {

@@ -1,21 +1,21 @@
 %%
-"*"        return MULT;
-"+"        return PLUS;
-"-"        return MINUS;
-"/"        return DIV;
+"*"        return MULT;   //
+"+"        return PLUS;   // 
+"-"        return MINUS;  // 
+"/"        return DIV;    // 
 "^"        return POINTER;
 
-"&&"      return AND;
+"&&"      return AND;       //
 "&"       return REFERENCE;
-"||"      return OR;
-"=="      return EQUALS;
-">="      return GEQUALS;
-"<="      return LEQUALS;
-">"       return GREATER;
-"<"       return LOWER;
+"||"      return OR;        //
+"=="      return EQUALS;    //
+">="      return GEQUALS;   //
+"<="      return LEQUALS;   //
+">"       return GREATER;   //
+"<"       return LOWER;     //
 
-"!="      return NEQUALS;
-"!"       return NOT;
+"!="      return NEQUALS;   //
+"!"       return NOT;       //?
 "="       return ASSIGN;
 
 "boolean" return BOOL;
@@ -37,8 +37,8 @@
 [0-9]+    return NUM;
 
 ";"       return SEMICOLON; 
-"("       return LEFTPAR; 
-")"       return RIGHTPAR; 
+"("       return LEFTPAR;   //?
+")"       return RIGHTPAR;  //?
 "["       return LEFTBRAC;
 "]"       return RIGHTBRAC; 
 "{"       return LEFTCURL;
@@ -46,6 +46,6 @@
 "|"       return PIPE;
 ","       return COMMA;
 
-[a-zA-Z_]([a-zA-Z_]|[0-9])* return IDENTIFIER;
-[ \t\v\n\f]*                 return WHITESPACE;
+[a-zA-Z_]([a-zA-Z_]|[0-9])*   return IDENTIFIER; //?
+[ \t\v\n\f]*                  ; //?
 %%
