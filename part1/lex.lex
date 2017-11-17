@@ -47,4 +47,5 @@
 ","       return COMMA;
 
 [a-zA-Z_]([a-zA-Z_]|[0-9])* return IDENTIFIER;
+[ \t\v\n\f]*                 return WHITESPACE;
 %%

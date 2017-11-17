@@ -11,6 +11,7 @@
 
   node* makeNode(char* token, node* left, node* right);
   void printTree(node* tree);
+  void freeTree(node* tree);
   #define YYSTYPE struct node*
 %}
 
@@ -25,20 +26,28 @@
 %token  RIGHTPAR RIGHTBRAC RIGHTCURL
 %token  COMMA SEMICOLON
 %token  PIPE
-%token  IDENTIFIER
+%token  IDENTIFIER WHITESPACE
+
 %left   PLUS MINUS 
 %left   MULT DIV
 %%
 
-s:    expr { printf("OK\n"); printTree($1); }
+s:    
+      tree  WHITESPACE s |
+      tree |
+      WHITESPACE {}
 
-expr: 
-      expr PLUS expr { $$ = makeNode("+", $1, $3); } |
-      expr MINUS expr { $$ = makeNode("-", $1, $3); } | 
-      expr MULT expr { $$ = makeNode("*", $1, $3); } |
-      expr DIV expr { $$ = makeNode("/", $1, $3); } |
+tree:
+      arith { printf("Arithmetic\n"); printTree($1); freeTree($1); } 
+
+arith:
+      arith PLUS  arith { $$ = makeNode("+", $1, $3); } |
+      arith MINUS arith { $$ = makeNode("-", $1, $3); } | 
+      arith MULT  arith { $$ = makeNode("*", $1, $3); } |
+      arith DIV   arith { $$ = makeNode("/", $1, $3); } |
 
       NUM { $$ = makeNode(yytext,NULL,NULL); }
+
 %%
   node* makeNode(char* token, node* left, node* right) {
     node* newNode = (node*)malloc(sizeof(node));
@@ -50,8 +59,17 @@ expr:
     return newNode;
   }
 
+  void freeTree(node* tree){
+      if (tree != NULL) {
+        freeTree(tree->right);
+        free(tree->token);
+        freeTree(tree->left);
+        free(tree);
+    }
+  }
+
   void printTree(node* tree) {
-    static count = 0;
+    static int count = 0;
 
     count++;
     if (tree->left) {
