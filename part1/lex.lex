@@ -45,4 +45,6 @@
 "}"       return RIGHTCURL;
 "|"       return PIPE;
 ","       return COMMA;
+
+[a-zA-Z_]([a-zA-Z_]|[0-9])* return IDENTIFIER;
 %%
