@@ -39,22 +39,62 @@
 %%
 
 program
-      : s {printf("THIS IS THE PROGRAM\n"); printTree($1); freeTree($1); }
+      : tree {printf("THIS IS THE PROGRAM\n"); printTree($1); freeTree($1); }
 
-s
-      : line s { printf( "line s\n") ;  $$ = makeNode("Line", $1 , $2);}
-      | line {printf("Rule: line \n"); $$ = makeNode("Line", $1 , NULL); }
+tree
+      : line tree {  $$ = makeNode("Line", $1 , $2);   }
+      | line      {  $$ = makeNode("Line", $1 , NULL); }
 
 
 line
-      : expr  SEMICOLON { $$ = $1 ; printf("Rule: expr SEMICOLON\n") ;}
+      : expr  SEMICOLON { $$ = $1; }
+      | statement { $$ = $1; }
+
+
+statement
+      : if_statement
+      | while_statement
+      | do_while_statement SEMICOLON
+      | for_statement
+
+if_statement
+      : IF wrapped_expr block_statement                      { $$ = makeNode("IF", $2, makeNode("THEN,ELSE", $3, NULL))  ;}
+      | IF wrapped_expr block_statement ELSE block_statement { $$ = makeNode("IF", $2, makeNode("THEN,ELSE", $3, $5) )   ;}
+      | IF wrapped_expr block_statement ELSE if_statement    { $$ = makeNode("IF", $2, makeNode("THEN,ELSE", $3, $5) )   ;}
+
+while_statement
+      : WHILE wrapped_expr block_statement { $$ = makeNode("WHILE", $2, $3) ;}
+
+do_while_statement
+      : DO block_statement WHILE wrapped_expr { $$ = makeNode("DO WHILE", $4 , $2 ) ;}
+
+block_statement
+      : LEFTCURL tree RIGHTCURL { $$ = makeNode("Block", $2, NULL); }
+
+
+for_statement
+      : FOR LEFTPAR for_kushalaimo RIGHTPAR block_statement { $$ = makeNode ("FOR", $3, $5) ; }
+
+for_kushalaimo
+      : for_expr SEMICOLON for_expr SEMICOLON for_expr
+      { $$ = makeNode("FOR_KUSHALAIMO", $1, makeNode("FOR_KUSHALAIMO2", $3, $5)) ;}
+
+for_expr
+      : expr { $$ = $1; }
+      | empty_expr { $$ = $1;}
 
 // Recurse here on S >:
 // block
 //       : LEFTCURL expr RIGHTCURL { $$ = makeNode("{}",  $2, NULL); }
 
-expr
+empty_expr
+      :  { $$ = makeNode(" ", NULL, NULL); }
+      |  LEFTPAR empty_expr RIGHTPAR { $$ = $2; }
+
+wrapped_expr
       : LEFTPAR expr RIGHTPAR   { $$ = $2; }
+expr
+      : wrapped_expr   { $$ = $1; }
       | NOT  expr               { $$ = makeNode("!",  $2, NULL); }
       | PIPE expr PIPE          { $$ = makeNode("abs", $2, NULL); }
       | expr AND expr           { $$ = makeNode("&&", $1, $3); }        

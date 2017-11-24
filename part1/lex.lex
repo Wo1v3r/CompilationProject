@@ -26,23 +26,23 @@
 "int"     return INT;
 "string"  return STRING;
 
-"if"      return IF;
-"else"    return ELSE;
-"while"   return WHILE;
-"do"      return DO;
-"for"     return FOR;
+"if"      return IF; //
+"else"    return ELSE; //
+"while"   return WHILE;//
+"do"      return DO;//
+"for"     return FOR; //
 "return"  return RETURN;
 
 "null"    return NULLVALUE; //
 [0-9]+    return NUM;       //
 
-";"       return SEMICOLON; 
+";"       return SEMICOLON; //
 "("       return LEFTPAR;   //
 ")"       return RIGHTPAR;  //
 "["       return LEFTBRAC;
 "]"       return RIGHTBRAC; 
-"{"       return LEFTCURL;
-"}"       return RIGHTCURL;
+"{"       return LEFTCURL; //
+"}"       return RIGHTCURL; //
 "|"       return PIPE;
 ","       return COMMA;
 
