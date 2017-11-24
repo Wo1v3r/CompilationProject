@@ -2,7 +2,8 @@
   #include <stdio.h>
   #include <string.h>
   #include <stdlib.h>
-  #include "lex.yy.c"  
+  #include "lex.yy.c"
+
   typedef struct node {
     char* token;
     struct node* left;
@@ -28,6 +29,8 @@
 %token  PIPE
 %token  IDENTIFIER
 
+%start  program
+
 %left   AND OR
 %left   EQUALS GEQUALS LEQUALS GREATER LOWER NEQUALS
 %left   PLUS MINUS 
@@ -35,9 +38,16 @@
 %left   NOT
 %%
 
+program
+      : s {printf("THIS IS THE PROGRAM\n"); printTree($1); freeTree($1); }
+
 s
-      : expr { printf("This is a tree\n"); printTree($1); freeTree($1); }
-      | s expr {$$=$1; printf("This is a tree\n"); printTree($2); freeTree($2); }
+      : line s { printf( "line s\n") ;  $$ = makeNode("Line", $1 , $2);}
+      | line {printf("Rule: line \n"); $$ = makeNode("Line", $1 , NULL); }
+
+
+line
+      : expr  SEMICOLON { $$ = $1 ; printf("Rule: expr SEMICOLON\n") ;}
 
 // Recurse here on S >:
 // block

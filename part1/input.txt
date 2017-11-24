@@ -1,2 +1,3 @@
-marina = 123
-svetlala = 25252
+a  =  5 ;
+d  =  6 ;
+H = 9;
