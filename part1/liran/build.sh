@@ -1,1 +1,0 @@
-lex lex.lex && yacc yacc.yacc && cc y.tab.c -ll

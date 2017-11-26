@@ -1,0 +1,1 @@
+rm lex.yy.c y.* compiler

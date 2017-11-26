@@ -1,4 +1,3 @@
-
 while ( fuckthisshit ) { 
   a + b;
   c + d;
