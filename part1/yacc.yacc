@@ -12,11 +12,6 @@
 
   node* makeNode(char* token, node* left, node* right);
 
-  int shouldNewLine(char* token);
-  int shouldSkip(char* token);
-  int shouldGroup(char* token);
-  void printTabs(int count);
-
   void printTree(node* tree);
   void freeTree(node* tree);
   #define YYSTYPE struct node*
@@ -194,86 +189,22 @@ ident
     }
   }
 
-
-  int shouldNewLine(char* token) {
-
-    int length = 2;
-    char* newlineableTokens[] = { "IF", "Block"};
-
-    for (int i = 0 ; i < length ; i++ ) {
-      if ( strcmp(token,newlineableTokens[i]) == 0 ) {
-        return 1;
-      }
-    }
-    return 0;
-  }
-
-  int shouldSkip(char* token) {
-
-    int length = 2;
-    char* skipableTokens[] = { "Line", "THEN,ELSE" };
-
-    for (int i = 0 ; i < length ; i++ ) {
-      if ( strcmp(token,skipableTokens[i]) == 0 ) {
-        return 1;
-      }
-    }
-    return 0;
-  }
-
-  int shouldGroup(char* token) {
-    int length = 1;
-    char* groupableTokens[] = { "Declaration" };
-
-    for (int i = 0 ; i < length ; i++ ) {
-      if ( strcmp(token,groupableTokens[i]) == 0 ) {
-        return 1;
-      }
-    }
-    return 0;
-  }
-
-  void printTabs(int count) {
-    for (int i = 0 ; i < count ; i ++) {
-      printf("\t");
-    }
-  }
-
   void printTree(node* tree) {
 
     static int tabCount = 0;
 
     char* token = tree->token;
 
-    if ( shouldGroup(token) ) {
-      printf("%s %s ", tree->left->token, tree->right->token );
-      return;
-    }
-
-    if (!shouldSkip(token)) {
-      printf("%s ", token);
-    }
-
-    if ( shouldNewLine(token) ) {
-      printf("\n");
-      printTabs(++tabCount);
-    }
-
     if (tree->left) {
       printTree(tree->left);
     }
 
-    if ( shouldNewLine(token) ) {
-      printf("\n");
-      printTabs(tabCount);
+    if ( token ) {
+      printf("%s\n", token);
     }
 
     if (tree->right) {
       printTree(tree->right);
-    }
-
-    if ( shouldNewLine(token) ) {
-      printTabs(--tabCount);
     }
   }
 

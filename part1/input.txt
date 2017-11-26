@@ -1,4 +1,2 @@
-if ( a == b) {
-  a + c ;
-  a + b ;
-}
+
+  int c = a + b;
