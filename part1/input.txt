@@ -1,2 +1,6 @@
 
-  int c = a + b;
+while ( fuckthisshit ) { 
+  a + b;
+  c + d;
+  return a + d;
+}

@@ -12,6 +12,8 @@
 
   node* makeNode(char* token, node* left, node* right);
 
+  char* getAction(int index, int action);
+  int getIndex(char* token);
   void printTree(node* tree);
   void freeTree(node* tree);
   #define YYSTYPE struct node*
@@ -189,23 +191,65 @@ ident
     }
   }
 
+  char* getAction(index, action) {
+
+    if (index == -1) return "";
+
+    char* actions[4][3] = {
+      {"\n","\n","\n"},
+      {"\n","\n","\n"},
+      {"\n","\n","\n"},
+      {"\n","\n","\n"}
+    };
+
+    return actions[index][action];
+  }
+
+  int getIndex(char* token) {
+    int length = 4;
+    char* tokens[] = {
+      "Line",
+      "WHILE",
+      "Return",
+      "Block"
+    };
+
+    for (int i = 0 ; i < length ; i++){
+      if (strcmp(tokens[i],token) == 0) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
   void printTree(node* tree) {
 
     static int tabCount = 0;
-
     char* token = tree->token;
+    int tokenIndex = getIndex(token);
 
-    if (tree->left) {
-      printTree(tree->left);
+    char* before = getAction(tokenIndex,0);
+    char* middle = getAction(tokenIndex,1);
+    char* after  = getAction(tokenIndex,2);
+    
+    
+    printf("%s", before);
+
+    if ( tree->left ) {
+      printTree( tree->left );
     }
 
-    if ( token ) {
+    printf("%s", middle);
+
+    if( token) {
       printf("%s\n", token);
     }
 
-    if (tree->right) {
-      printTree(tree->right);
+    if ( tree->right ) {
+      printTree( tree->right );
     }
+
+    printf("%s", after);
   }
 
   int main() {
