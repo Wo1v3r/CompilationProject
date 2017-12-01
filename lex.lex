@@ -52,13 +52,17 @@
 "}"       return RIGHTCURL; //
 "|"       return PIPE;      //
 ","       return COMMA;     //
-"'"       return SQUOTE;
-"\""      return QUOTE;
 
-[a-zA-Z_]([a-zA-Z_]|[0-9])*   return IDENTIFIER; // ADD SOMETHING SEPERATE FOR STRING
+
+\"(\\.|[^"\\])*\"             return STRINGVALUE;
+\'.\'                         return CHARVALUE;
+
+[a-zA-Z_]([a-zA-Z_]|[0-9])*   return IDENTIFIER;
 "/*"   { comment(); }
 
-[ \t\v\n\f]*                  ; //
+[ \t\v\n\f]*           ; //
+
+.                             return ERR;
 %%
 
 void comment(void) {

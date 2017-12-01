@@ -12,7 +12,7 @@
 
   node* makeNode(char* token, node* left, node* right);
 
-  int yyerror();
+  int yyerror(char* error);
   void printTree(node* tree);
   void freeTree(node* tree);
   #define YYSTYPE struct node*
@@ -30,7 +30,8 @@
 %token  COMMA SEMICOLON
 %token  PIPE
 %token  IDENTIFIER
-%token  SQUOTE QUOTE
+%token  STRINGVALUE CHARVALUE
+%token  ERR
 
 %start  program
 
@@ -45,7 +46,8 @@
 %%
 
 program
-      : tree {printf("Program\n=======\n\n"); printTree($1); freeTree($1); }
+      : tree { printf("Program\n=======\n\n"); printTree($1); freeTree($1); }
+      | ERR  { fprintf(stderr, "Token %s is not recognized\n", yytext);}
 
 tree
       : line tree {  $$ = makeNode("line", $1 , $2);   }
@@ -165,9 +167,10 @@ expr
       | memory
 
 
-      | QUOTE ident QUOTE       { $$ = makeNode("\"\"",$2, NULL); }
-      | SQUOTE ident  SQUOTE    { $$ = makeNode("''", $2, NULL);}
+      | STRINGVALUE             { $$ = makeNode(yytext, NULL , NULL); }
+      | CHARVALUE               { $$ = makeNode(yytext, NULL , NULL); }
       | NULLVALUE               { $$ = makeNode(yytext,NULL,NULL); }
+
       | REFERENCE ident         { $$ = makeNode("reference", $2, NULL); }
       | POINTER ident           { $$ = makeNode("pointer", $2, NULL); }
       | function_call
@@ -281,7 +284,9 @@ num
     return yyparse();
   }
 
-  int yyerror() {
-    printf("Some error\n");
+  int yyerror(char* error) {
+    if (error) {
+        fprintf(stderr, "%s\n", error);
+    }
     return 0;
   }
