@@ -12,8 +12,7 @@
 
   node* makeNode(char* token, node* left, node* right);
 
-  char* getAction(int index, int action);
-  int getIndex(char* token);
+  int yyerror();
   void printTree(node* tree);
   void freeTree(node* tree);
   #define YYSTYPE struct node*
@@ -42,15 +41,14 @@
 %%
 
 program
-      : tree {printf("THIS IS THE PROGRAM\n"); printTree($1); freeTree($1); }
+      : tree {printf("Program\n=======\n\n"); printTree($1); freeTree($1); }
 
 tree
-      : line tree {  $$ = makeNode("Line", $1 , $2);   }
-      | line      {  $$ = makeNode("Line", $1 , NULL); }
+      : line tree {  $$ = makeNode("line", $1 , $2);   }
+      | line      {  $$ = makeNode("line", $1 , NULL); }
 
 line
-      : RETURN line { $$ = makeNode("Return", $2, NULL); }
-      | expr  SEMICOLON { $$ = $1; }
+      : expr  SEMICOLON { $$ = $1; }
       | statement { $$ = $1; }
 
 statement
@@ -62,31 +60,31 @@ statement
       | declaration_statement SEMICOLON
 
 if_statement
-      : IF wrapped_expr block_statement                      { $$ = makeNode("IF", $2, makeNode("THEN,ELSE", $3, NULL))  ;}
-      | IF wrapped_expr block_statement ELSE block_statement { $$ = makeNode("IF", $2, makeNode("THEN,ELSE", $3, $5) )   ;}
-      | IF wrapped_expr block_statement ELSE if_statement    { $$ = makeNode("IF", $2, makeNode("THEN,ELSE", $3, $5) )   ;}
+      : IF wrapped_expr block_statement                      { $$ = makeNode("if", $2, makeNode("then, else", $3, NULL))  ;}
+      | IF wrapped_expr block_statement ELSE block_statement { $$ = makeNode("if", $2, makeNode("then, else", $3, $5) )   ;}
+      | IF wrapped_expr block_statement ELSE if_statement    { $$ = makeNode("if", $2, makeNode("then, else", $3, $5) )   ;}
 
 while_statement
-      : WHILE wrapped_expr block_statement { $$ = makeNode("WHILE", $2, $3) ;}
+      : WHILE wrapped_expr block_statement { $$ = makeNode("while", $2, $3) ;}
 
 do_while_statement
-      : DO block_statement WHILE wrapped_expr { $$ = makeNode("DO WHILE", $4 , $2 ) ;}
+      : DO block_statement WHILE wrapped_expr { $$ = makeNode("do while", $4 , $2 ) ;}
 
 block_statement
-      : LEFTCURL tree RIGHTCURL { $$ = makeNode("Block", $2, NULL); }
+      : LEFTCURL tree RIGHTCURL { $$ = makeNode("block", $2, NULL); }
 
 declaration_statement
       : decl ASSIGN ident index { $$ = makeNode("=", $1, makeNode("[]", $3, $4) ); } 
       | decl ASSIGN expr  { $$ = makeNode("=", $1, $3); }
-      | type list_ident { $$ = makeNode("Declaration List", $1, $2);  }
+      | type list_ident { $$ = makeNode("decl list ", $1, $2);  }
       | decl  {$$ = $1;}
 
 function_call
-      : ident LEFTPAR call_arguments RIGHTPAR { $$ = makeNode ("Function call", $1, $3); }
+      : ident LEFTPAR call_arguments RIGHTPAR { $$ = makeNode ("function call", $1, $3); }
 
 function_statement  // This is equivalent to a function call, not a definition
-      : decl LEFTPAR function_arguments RIGHTPAR block_statement { $$ = makeNode("Function def", $1, makeNode("Settings", $3, $5)); }
-      | decl LEFTPAR function_arguments RIGHTPAR SEMICOLON { $$ = makeNode("Function dec", $1, $3); }
+      : decl LEFTPAR function_arguments RIGHTPAR block_statement { $$ = makeNode("function def", $1, makeNode("settings", $3, $5)); }
+      | decl LEFTPAR function_arguments RIGHTPAR SEMICOLON { $$ = makeNode("function dec", $1, $3); }
 
 function_arguments
       : empty_expr  // This is not good because function1(())
@@ -97,25 +95,25 @@ call_arguments
       | list_expr { $$ = $1; }
 
 list_dec
-      : decl { $$ = makeNode("Declarations", $1 , NULL); }
-      | decl COMMA list_dec { $$ = makeNode("Declarations", $1, $3); }
+      : decl { $$ = makeNode("dec", $1 , NULL); }
+      | decl COMMA list_dec { $$ = makeNode("dec", $1, $3); }
 
 list_ident
-      : ident { $$ = makeNode("Identifiers", $1, NULL); }
-      | ident COMMA list_ident { $$ = makeNode("Identifiers", $1, $3); }
+      : ident { $$ = makeNode("ident", $1, NULL); }
+      | ident COMMA list_ident { $$ = makeNode("ident", $1, $3); }
 
 list_expr
-      : expr { $$ = makeNode("Expressions", $1 , NULL); }
-      | expr COMMA list_expr {$$ = makeNode("Expressions", $1, $3); }
+      : expr { $$ = makeNode("exp", $1 , NULL); }
+      | expr COMMA list_expr {$$ = makeNode("exp", $1, $3); }
 
 
 
 for_statement
-      : FOR LEFTPAR for_kushalaimo RIGHTPAR block_statement { $$ = makeNode ("FOR", $3, $5) ; }
+      : FOR LEFTPAR for_kushalaimo RIGHTPAR block_statement { $$ = makeNode ("for", $3, $5) ; }
 
 for_kushalaimo
       : for_expr SEMICOLON for_expr SEMICOLON for_expr
-      { $$ = makeNode("FOR_KUSHALAIMO", $1, makeNode("FOR_KUSHALAIMO2", $3, $5)) ;}
+      { $$ = makeNode("for_kushalaimo", $1, makeNode("for_kushalaimo2", $3, $5)) ;}
 
 for_expr
       : expr { $$ = $1; }
@@ -129,6 +127,7 @@ wrapped_expr
       : LEFTPAR expr RIGHTPAR   { $$ = $2; }
 expr
       : wrapped_expr   { $$ = $1; }
+      | RETURN expr             { $$ = makeNode("return", $2, NULL); }
       | NOT  expr               { $$ = makeNode("!",  $2, NULL); }
       | PIPE expr PIPE          { $$ = makeNode("abs", $2, NULL); }
       | expr AND expr           { $$ = makeNode("&&", $1, $3); }        
@@ -150,11 +149,11 @@ expr
       | NUM                     { $$ = makeNode(yytext,NULL,NULL); }  
       | NULLVALUE               { $$ = makeNode(yytext,NULL,NULL); }
       | ident                   { $$ = $1; }
-      | REFERENCE ident         { $$ = makeNode("Reference", $2, NULL); }
-      | POINTER ident           { $$ = makeNode("Pointer", $2, NULL); }
+      | REFERENCE ident         { $$ = makeNode("reference", $2, NULL); }
+      | POINTER ident           { $$ = makeNode("pointer", $2, NULL); }
 
 decl
-      : type ident              { $$ = makeNode("Declaration", $1, $2); }
+      : type ident              { $$ = makeNode("declaration", $1, $2); }
 
 index
       : LEFTBRAC expr RIGHTBRAC { $$ = $2; }
@@ -191,65 +190,47 @@ ident
     }
   }
 
-  char* getAction(index, action) {
+  void tab(int times) {
+    printf("\n");
 
-    if (index == -1) return "";
-
-    char* actions[4][3] = {
-      {"\n","\n","\n"},
-      {"\n","\n","\n"},
-      {"\n","\n","\n"},
-      {"\n","\n","\n"}
-    };
-
-    return actions[index][action];
+    for (int i = 0 ; i < times ; i++) {
+      printf("\t");
+    }
   }
 
-  int getIndex(char* token) {
-    int length = 4;
-    char* tokens[] = {
-      "Line",
-      "WHILE",
-      "Return",
-      "Block"
-    };
-
-    for (int i = 0 ; i < length ; i++){
-      if (strcmp(tokens[i],token) == 0) {
-        return i;
-      }
+  int shouldTab(char* token) {
+    if (
+      strcmp(token,"line") == 0
+      ||
+      strcmp(token,"then, else") == 0
+      ) {
+      return 0;
     }
-    return -1;
+    return 1;
   }
 
   void printTree(node* tree) {
 
     static int tabCount = 0;
     char* token = tree->token;
-    int tokenIndex = getIndex(token);
 
-    char* before = getAction(tokenIndex,0);
-    char* middle = getAction(tokenIndex,1);
-    char* after  = getAction(tokenIndex,2);
-    
-    
-    printf("%s", before);
+    if ( shouldTab(token) ) {
+      printf("%s", token);
+      tab(++tabCount);
+    }
 
     if ( tree->left ) {
       printTree( tree->left );
-    }
-
-    printf("%s", middle);
-
-    if( token) {
-      printf("%s\n", token);
     }
 
     if ( tree->right ) {
       printTree( tree->right );
     }
 
-    printf("%s", after);
+    if (shouldTab(token)) {
+      tabCount--;
+      tab(tabCount);
+    }
   }
 
   int main() {
@@ -257,6 +238,6 @@ ident
   }
 
   int yyerror() {
-    printf("MY ERROR\n");
+    printf("Some error\n");
     return 0;
   }
