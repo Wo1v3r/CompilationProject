@@ -8,7 +8,7 @@ diff ./tests/mergesort.spec.txt ./tests/mergesort.ast
 
 if [ $? -ne 1 ]
 then
-  echo -e "\033[0;34m All Tests Passed!"
+  echo -e "\033[0;32m All Tests Passed!"
 else
   echo -e "\033[0;31m Tests failed"
 fi
