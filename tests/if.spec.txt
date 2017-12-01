@@ -1,0 +1,35 @@
+Program
+=======
+
+if
+	a
+		
+	block
+		=
+			a
+				
+			0
+				
+			
+		
+	if
+		b
+			
+		block
+			=
+				b
+					
+				0
+					
+				
+			
+		block
+			=
+				c
+					
+				0
+					
+				
+			
+		
+	
