@@ -30,6 +30,7 @@
 %token  COMMA SEMICOLON
 %token  PIPE
 %token  IDENTIFIER
+%token  SQUOTE QUOTE
 
 %start  program
 
@@ -48,8 +49,8 @@ tree
       | line      {  $$ = makeNode("line", $1 , NULL); }
 
 line
-      : expr  SEMICOLON { $$ = $1; }
-      | statement { $$ = $1; }
+      : expr  SEMICOLON
+      | statement
 
 statement
       : if_statement
@@ -77,7 +78,7 @@ declaration_statement
       : decl ASSIGN ident index { $$ = makeNode("=", $1, makeNode("[]", $3, $4) ); } 
       | decl ASSIGN expr  { $$ = makeNode("=", $1, $3); }
       | type list_ident { $$ = makeNode("decl list ", $1, $2);  }
-      | decl  {$$ = $1;}
+      | decl
 
 function_call
       : ident LEFTPAR call_arguments RIGHTPAR { $$ = makeNode ("function call", $1, $3); }
@@ -88,11 +89,11 @@ function_statement  // This is equivalent to a function call, not a definition
 
 function_arguments
       : empty_expr  // This is not good because function1(())
-      | list_dec { $$ = $1; }
+      | list_dec
 
 call_arguments
       : empty_expr
-      | list_expr { $$ = $1; }
+      | list_expr
 
 list_dec
       : decl { $$ = makeNode("dec", $1 , NULL); }
@@ -109,15 +110,23 @@ list_expr
 
 
 for_statement
-      : FOR LEFTPAR for_kushalaimo RIGHTPAR block_statement { $$ = makeNode ("for", $3, $5) ; }
+      : FOR LEFTPAR for_setup RIGHTPAR block_statement { $$ = makeNode ("for", $3, $5) ; }
+      | FOR LEFTPAR for_setup RIGHTPAR line { $$ = makeNode ("for", $3, $5) ; }
 
-for_kushalaimo
-      : for_expr SEMICOLON for_expr SEMICOLON for_expr
-      { $$ = makeNode("for_kushalaimo", $1, makeNode("for_kushalaimo2", $3, $5)) ;}
+for_setup
+      : for_init SEMICOLON for_condition SEMICOLON for_update
+      { $$ = makeNode("setup", $1, makeNode("inner", $3, $5)) ;}
+
+for_init
+      : for_expr { $$ = makeNode("init", $1, NULL); }
+for_condition
+      : for_expr { $$ = makeNode("condition", $1, NULL); }
+for_update
+      : for_expr { $$ = makeNode("update", $1, NULL); }
 
 for_expr
-      : expr { $$ = $1; }
-      | empty_expr { $$ = $1;}
+      : expr
+      | empty_expr
 
 empty_expr
       :  { $$ = makeNode(" ", NULL, NULL); }
@@ -126,7 +135,7 @@ empty_expr
 wrapped_expr
       : LEFTPAR expr RIGHTPAR   { $$ = $2; }
 expr
-      : wrapped_expr   { $$ = $1; }
+      : wrapped_expr
       | RETURN expr             { $$ = makeNode("return", $2, NULL); }
       | NOT  expr               { $$ = makeNode("!",  $2, NULL); }
       | PIPE expr PIPE          { $$ = makeNode("abs", $2, NULL); }
@@ -144,11 +153,13 @@ expr
       | expr DIV   expr         { $$ = makeNode("/", $1, $3); }
 
       | ident ASSIGN expr       { $$ = makeNode("=", $1, $3); }
-      | function_call           { $$ = $1; }
+      | function_call
 
+      | QUOTE ident QUOTE       { $$ = makeNode("\"\"",$2, NULL); }
+      | SQUOTE ident  SQUOTE    { $$ = makeNode("''", $2, NULL);}
       | NUM                     { $$ = makeNode(yytext,NULL,NULL); }  
       | NULLVALUE               { $$ = makeNode(yytext,NULL,NULL); }
-      | ident                   { $$ = $1; }
+      | ident                   
       | REFERENCE ident         { $$ = makeNode("reference", $2, NULL); }
       | POINTER ident           { $$ = makeNode("pointer", $2, NULL); }
 
@@ -191,7 +202,6 @@ ident
   }
 
   void tab(int times) {
-    printf("\n");
 
     for (int i = 0 ; i < times ; i++) {
       printf("\t");
@@ -203,6 +213,14 @@ ident
       strcmp(token,"line") == 0
       ||
       strcmp(token,"then, else") == 0
+      ||
+      strcmp(token,"inner") == 0
+      ||
+      strcmp(token,"\"\"") == 0
+      ||
+      strcmp(token, "''") == 0
+      ||
+      strcmp(token, "settings")  == 0
       ) {
       return 0;
     }
@@ -215,7 +233,7 @@ ident
     char* token = tree->token;
 
     if ( shouldTab(token) ) {
-      printf("%s", token);
+      printf("%s\n", token);
       tab(++tabCount);
     }
 
@@ -228,8 +246,9 @@ ident
     }
 
     if (shouldTab(token)) {
-      tabCount--;
-      tab(tabCount);
+        tabCount--;
+        printf("\n");
+        tab(tabCount);
     }
   }
 

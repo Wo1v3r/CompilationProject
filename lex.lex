@@ -52,9 +52,10 @@
 "}"       return RIGHTCURL; //
 "|"       return PIPE;      //
 ","       return COMMA;     //
+"'"       return SQUOTE;
+"\""      return QUOTE;
 
-[a-zA-Z_]([a-zA-Z_]|[0-9])*   return IDENTIFIER; //
-
+[a-zA-Z_]([a-zA-Z_]|[0-9])*   return IDENTIFIER; // ADD SOMETHING SEPERATE FOR STRING
 "/*"   { comment(); }
 
 [ \t\v\n\f]*                  ; //
