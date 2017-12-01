@@ -1,1 +1,14 @@
+#!/bin/bash
+
 ./compiler < ./tests/mergesort.spec.c > ./tests/mergesort.ast
+./compiler < ./tests/if.spec.c > ./tests/if.ast
+
+diff ./tests/if.spec.txt ./tests/if.ast
+diff ./tests/mergesort.spec.txt ./tests/mergesort.ast
+
+if [ $? -ne 1 ]
+then
+  echo -e "\033[0;34m All Tests Passed!"
+else
+  echo -e "\033[0;31m Tests failed"
+fi
