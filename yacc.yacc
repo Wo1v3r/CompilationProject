@@ -236,22 +236,22 @@ num
     }
   }
 
+
   int shouldTab(char* token) {
-    if (
-      strcmp(token,"line") == 0
-      ||
-      strcmp(token,"then, else") == 0
-      ||
-      strcmp(token,"inner") == 0
-      ||
-      strcmp(token,"\"\"") == 0
-      ||
-      strcmp(token, "''") == 0
-      ||
-      strcmp(token, "settings")  == 0
-      ) {
-      return 0;
+    int length = 4;
+
+    char* keywords[] = {
+      "line",
+      "then, else",
+      "inner",
+      "settings"
+    };
+
+    for (int i = 0 ; i < length ; i++ ) {
+      if (strcmp(token,keywords[i]) == 0) 
+        return 0;
     }
+
     return 1;
   }
 
