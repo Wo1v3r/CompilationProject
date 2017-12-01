@@ -34,11 +34,14 @@
 
 %start  program
 
+%left   RETURN
+%left   ASSIGN
 %left   AND OR
 %left   EQUALS GEQUALS LEQUALS GREATER LOWER NEQUALS
 %left   PLUS MINUS 
 %left   MULT DIV
 %left   NOT
+
 %%
 
 program
@@ -49,8 +52,12 @@ tree
       | line      {  $$ = makeNode("line", $1 , NULL); }
 
 line
-      : expr  SEMICOLON
+      : command
       | statement
+
+command
+      : expr SEMICOLON
+      | SEMICOLON
 
 statement
       : if_statement
@@ -61,12 +68,16 @@ statement
       | declaration_statement SEMICOLON
 
 if_statement
-      : IF wrapped_expr block_statement                      { $$ = makeNode("if", $2, makeNode("then, else", $3, NULL))  ;}
-      | IF wrapped_expr block_statement ELSE block_statement { $$ = makeNode("if", $2, makeNode("then, else", $3, $5) )   ;}
-      | IF wrapped_expr block_statement ELSE if_statement    { $$ = makeNode("if", $2, makeNode("then, else", $3, $5) )   ;}
+      : IF wrapped_expr command_statement                         { $$ = makeNode("if", $2, makeNode("then, else", $3, NULL))  ;}
+      | IF wrapped_expr command_statement ELSE command_statement  { $$ = makeNode("if", $2, makeNode("then, else", $3, $5) )   ;}
+      | IF wrapped_expr command_statement ELSE if_statement       { $$ = makeNode("if", $2, makeNode("then, else", $3, $5) )   ;}
+
+command_statement
+      : block_statement
+      | command
 
 while_statement
-      : WHILE wrapped_expr block_statement { $$ = makeNode("while", $2, $3) ;}
+      : WHILE wrapped_expr command_statement { $$ = makeNode("while", $2, $3) ;}
 
 do_while_statement
       : DO block_statement WHILE wrapped_expr { $$ = makeNode("do while", $4 , $2 ) ;}
@@ -75,8 +86,7 @@ block_statement
       : LEFTCURL tree RIGHTCURL { $$ = makeNode("block", $2, NULL); }
 
 declaration_statement
-      : decl ASSIGN ident index { $$ = makeNode("=", $1, makeNode("[]", $3, $4) ); } 
-      | decl ASSIGN expr  { $$ = makeNode("=", $1, $3); }
+      : decl ASSIGN expr  { $$ = makeNode("=", $1, $3); }
       | type list_ident { $$ = makeNode("decl list ", $1, $2);  }
       | decl
 
@@ -85,7 +95,6 @@ function_call
 
 function_statement  // This is equivalent to a function call, not a definition
       : decl LEFTPAR function_arguments RIGHTPAR block_statement { $$ = makeNode("function def", $1, makeNode("settings", $3, $5)); }
-      | decl LEFTPAR function_arguments RIGHTPAR SEMICOLON { $$ = makeNode("function dec", $1, $3); }
 
 function_arguments
       : empty_expr  // This is not good because function1(())
@@ -96,22 +105,21 @@ call_arguments
       | list_expr
 
 list_dec
-      : decl { $$ = makeNode("dec", $1 , NULL); }
-      | decl COMMA list_dec { $$ = makeNode("dec", $1, $3); }
+      : decl { $$ = makeNode("dec_list", $1 , NULL); }
+      | decl COMMA list_dec { $$ = makeNode("dec_list", $1, $3); }
 
 list_ident
-      : ident { $$ = makeNode("ident", $1, NULL); }
-      | ident COMMA list_ident { $$ = makeNode("ident", $1, $3); }
+      : ident { $$ = makeNode("ident_list", $1, NULL); }
+      | ident COMMA list_ident { $$ = makeNode("ident_list", $1, $3); }
 
 list_expr
-      : expr { $$ = makeNode("exp", $1 , NULL); }
-      | expr COMMA list_expr {$$ = makeNode("exp", $1, $3); }
+      : expr { $$ = makeNode("expr_list", $1 , NULL); }
+      | expr COMMA list_expr {$$ = makeNode("expr_list", $1, $3); }
 
 
 
 for_statement
-      : FOR LEFTPAR for_setup RIGHTPAR block_statement { $$ = makeNode ("for", $3, $5) ; }
-      | FOR LEFTPAR for_setup RIGHTPAR line { $$ = makeNode ("for", $3, $5) ; }
+      : FOR LEFTPAR for_setup RIGHTPAR command_statement { $$ = makeNode ("for", $3, $5) ; }
 
 for_setup
       : for_init SEMICOLON for_condition SEMICOLON for_update
@@ -153,21 +161,35 @@ expr
       | expr DIV   expr         { $$ = makeNode("/", $1, $3); }
 
       | ident ASSIGN expr       { $$ = makeNode("=", $1, $3); }
-      | function_call
+      | memory ASSIGN expr      { $$ = makeNode("=", $1, $2); }  
+      | memory
+
 
       | QUOTE ident QUOTE       { $$ = makeNode("\"\"",$2, NULL); }
       | SQUOTE ident  SQUOTE    { $$ = makeNode("''", $2, NULL);}
-      | NUM                     { $$ = makeNode(yytext,NULL,NULL); }  
       | NULLVALUE               { $$ = makeNode(yytext,NULL,NULL); }
-      | ident                   
       | REFERENCE ident         { $$ = makeNode("reference", $2, NULL); }
       | POINTER ident           { $$ = makeNode("pointer", $2, NULL); }
+      | function_call
+
+      | ident                   
+      | num
 
 decl
-      : type ident              { $$ = makeNode("declaration", $1, $2); }
+      : type variable              { $$ = makeNode("declaration", $1, $2); }
+
+variable
+      : ident
+      | ident index       { $$ = makeNode("array", $1, $2 ); }
+
+memory
+      : ident access_index      { $$ = makeNode("[]", $1, $2); }
+
+access_index
+      : LEFTBRAC expr RIGHTBRAC { $$ = $2; }
 
 index
-      : LEFTBRAC expr RIGHTBRAC { $$ = $2; }
+      : LEFTBRAC num RIGHTBRAC { $$ = $2; }
 
 type
       : BOOL        { $$ = makeNode(yytext,NULL,NULL); }
@@ -180,6 +202,9 @@ type
 
 ident
       : IDENTIFIER  { $$ = makeNode(yytext,NULL,NULL); }
+
+num   
+      : NUM         { $$ = makeNode(yytext,NULL,NULL); }  
 
 %%
   node* makeNode(char* token, node* left, node* right) {

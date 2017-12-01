@@ -1,3 +1,4 @@
 compiler
 lex.yy.c
 y.*
+input.c

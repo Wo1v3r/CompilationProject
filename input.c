@@ -1,2 +1,0 @@
-
-if ( liran == marina ) dosomething();
