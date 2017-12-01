@@ -1,4 +1,5 @@
 compiler
+input.c
 lex.yy.c
 y.*
-input.c
+tests/*.ast
