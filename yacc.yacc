@@ -2,7 +2,7 @@
   #include <stdio.h>
   #include <string.h>
   #include <stdlib.h>
-  #include "lex.yy.c"
+  #include "lex.yy.c" 
 
   typedef struct node {
     char* token;
@@ -111,8 +111,8 @@ list_dec
       | decl COMMA list_dec { $$ = makeNode("dec_list", $1, $3); }
 
 list_ident
-      : ident { $$ = makeNode("ident_list", $1, NULL); }
-      | ident COMMA list_ident { $$ = makeNode("ident_list", $1, $3); }
+      : variable { $$ = makeNode("ident_list", $1, NULL); }
+      | variable COMMA list_ident { $$ = makeNode("ident_list", $1, $3); }
 
 list_expr
       : expr { $$ = makeNode("expr_list", $1 , NULL); }
@@ -172,6 +172,7 @@ expr
       | NULLVALUE               { $$ = makeNode(yytext,NULL,NULL); }
 
       | REFERENCE ident         { $$ = makeNode("reference", $2, NULL); }
+      | REFERENCE memory        { $$ = makeNode("reference", $2, NULL); }
       | POINTER ident           { $$ = makeNode("pointer", $2, NULL); }
       | function_call
 
