@@ -2,7 +2,7 @@
   #include <stdio.h>
   #include <string.h>
   #include <stdlib.h>
-  #include "lex.yy.c" 
+  #include "lex.yy.c"
 
   typedef struct node {
     char* token;
@@ -12,9 +12,9 @@
 
   node* makeNode(char* token, node* left, node* right);
 
-  int yyerror(char* error);
   void printTree(node* tree);
   void freeTree(node* tree);
+  int yyerror(const char*);
   #define YYSTYPE struct node*
 %}
 
@@ -31,7 +31,6 @@
 %token  PIPE
 %token  IDENTIFIER
 %token  STRINGVALUE CHARVALUE
-%token  ERR
 
 %start  program
 
@@ -47,7 +46,6 @@
 
 program
       : tree { printf("Program\n=======\n\n"); printTree($1); freeTree($1); }
-      | ERR  { fprintf(stderr, "Token %s is not recognized\n", yytext);}
 
 tree
       : line tree {  $$ = makeNode("line", $1 , $2);   }
@@ -285,9 +283,11 @@ num
     return yyparse();
   }
 
-  int yyerror(char* error) {
-    if (error) {
-        fprintf(stderr, "%s\n", error);
+  int yyerror(const char* error) {
+    if(strcmp(error,"Unkown token") == 0){
+          fprintf(stderr, "Scanner error: %s\n", error);
+          return 0;
     }
+    fprintf(stderr, "Error in line: %d. '%s' was not expected.\n", linenum,yytext);
     return 0;
   }

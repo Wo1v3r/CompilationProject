@@ -1,6 +1,7 @@
 %{ 
   #include <stdio.h>
   void comment(void);
+  int linenum = 1;
 %}
 
 %%
@@ -62,9 +63,10 @@
 [a-zA-Z_]([a-zA-Z_]|[0-9])*   return IDENTIFIER;
 "/*"   { comment(); }
 
-[ \t\v\n\f]*           ; //
+[ \t\v\f]*           ; //
+"\n"      ++linenum;
 
-.                             return ERR;
+.                             { yyerror("Unkown token"); exit(1); }
 %%
 
 void comment(void) {
