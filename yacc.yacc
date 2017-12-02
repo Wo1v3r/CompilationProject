@@ -93,11 +93,11 @@ declaration_statement
 function_call
       : ident LEFTPAR call_arguments RIGHTPAR { $$ = makeNode ("function call", $1, $3); }
 
-function_statement  // This is equivalent to a function call, not a definition
+function_statement
       : decl LEFTPAR function_arguments RIGHTPAR block_statement { $$ = makeNode("function def", $1, makeNode("settings", $3, $5)); }
 
 function_arguments
-      : empty_expr  // This is not good because function1(())
+      : empty_expr
       | list_dec
 
 call_arguments
