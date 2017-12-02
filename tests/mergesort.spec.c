@@ -43,17 +43,18 @@ void merge(int a[30],int i1,int j1,int i2,int j2)
 
 int main()
 {
-    int a[30],n,i;
-      printf("Enter no of elements:");
+    int a[30];
+    int n,i;
+
       scanf("%d",&n);
-      printf("Enter array elements:");
+
       
       for(i=0;i<n;i= i + 1)
-         scanf("%d",&a[i]);
+         scanf("%d",a[i]);
           
       mergesort(a,0,n-1);
       
-      printf("\nSorted array is :");
+
       for(i=0;i<n;i = i + 1)
           printf("%d ",a[i]);
   

@@ -1,1 +1,561 @@
-UNDEFINED
+Program
+=======
+
+function def
+	declaration
+		void
+			
+		mergesort
+			
+		
+	dec_list
+		declaration
+			int
+				
+			array
+				a
+					
+				30
+					
+				
+			
+		dec_list
+			declaration
+				int
+					
+				i
+					
+				
+			dec_list
+				declaration
+					int
+						
+					j
+						
+					
+				
+			
+		
+	block
+		decl list 
+			int
+				
+			ident_list
+				mid
+					
+				
+			
+		if
+			<
+				i
+					
+				j
+					
+				
+			block
+				=
+					mid
+						
+					/
+						+
+							i
+								
+							j
+								
+							
+						2
+							
+						
+					
+				function call
+					mergesort
+						
+					expr_list
+						a
+							
+						expr_list
+							i
+								
+							expr_list
+								mid
+									
+								
+							
+						
+					
+				function call
+					mergesort
+						
+					expr_list
+						a
+							
+						expr_list
+							+
+								mid
+									
+								1
+									
+								
+							expr_list
+								j
+									
+								
+							
+						
+					
+				function call
+					merge
+						
+					expr_list
+						a
+							
+						expr_list
+							i
+								
+							expr_list
+								mid
+									
+								expr_list
+									+
+										mid
+											
+										1
+											
+										
+									expr_list
+										j
+											
+										
+									
+								
+							
+						
+					
+				
+			
+		
+	
+function def
+	declaration
+		void
+			
+		merge
+			
+		
+	dec_list
+		declaration
+			int
+				
+			array
+				a
+					
+				30
+					
+				
+			
+		dec_list
+			declaration
+				int
+					
+				i1
+					
+				
+			dec_list
+				declaration
+					int
+						
+					j1
+						
+					
+				dec_list
+					declaration
+						int
+							
+						i2
+							
+						
+					dec_list
+						declaration
+							int
+								
+							j2
+								
+							
+						
+					
+				
+			
+		
+	block
+		declaration
+			int
+				
+			array
+				temp
+					
+				50
+					
+				
+			
+		decl list 
+			int
+				
+			ident_list
+				i
+					
+				ident_list
+					j
+						
+					ident_list
+						k
+							
+						
+					
+				
+			
+		=
+			i
+				
+			i1
+				
+			
+		=
+			j
+				
+			i2
+				
+			
+		=
+			k
+				
+			0
+				
+			
+		while
+			&&
+				<=
+					i
+						
+					j1
+						
+					
+				<=
+					j
+						
+					j2
+						
+					
+				
+			block
+				if
+					<
+						[]
+							a
+								
+							i
+								
+							
+						[]
+							a
+								
+							j
+								
+							
+						
+					block
+						=
+							[]
+								temp
+									
+								=
+									k
+										
+									+
+										k
+											
+										1
+											
+										
+									
+								
+							
+						
+					block
+						=
+							[]
+								temp
+									
+								=
+									k
+										
+									+
+										k
+											
+										1
+											
+										
+									
+								
+							
+						
+					
+				
+			
+		while
+			<=
+				i
+					
+				j1
+					
+				
+			=
+				[]
+					temp
+						
+					=
+						k
+							
+						+
+							k
+								
+							1
+								
+							
+						
+					
+				
+			
+		while
+			<=
+				j
+					
+				j2
+					
+				
+			=
+				[]
+					temp
+						
+					=
+						k
+							
+						+
+							k
+								
+							1
+								
+							
+						
+					
+				
+			
+		for
+			setup
+				init
+					=
+						i
+							
+						i1
+							
+						
+					
+				condition
+					<=
+						i
+							
+						j2
+							
+						
+					
+				update
+					=
+						i
+							
+						+
+							i
+								
+							1
+								
+							
+						
+					
+				
+			=
+				[]
+					a
+						
+					i
+						
+					
+				
+			
+		
+	
+function def
+	declaration
+		int
+			
+		main
+			
+		
+	 
+		
+	block
+		declaration
+			int
+				
+			array
+				a
+					
+				30
+					
+				
+			
+		decl list 
+			int
+				
+			ident_list
+				n
+					
+				ident_list
+					i
+						
+					
+				
+			
+		function call
+			scanf
+				
+			expr_list
+				"%d"
+					
+				expr_list
+					reference
+						n
+							
+						
+					
+				
+			
+		for
+			setup
+				init
+					=
+						i
+							
+						0
+							
+						
+					
+				condition
+					<
+						i
+							
+						n
+							
+						
+					
+				update
+					=
+						i
+							
+						+
+							i
+								
+							1
+								
+							
+						
+					
+				
+			function call
+				scanf
+					
+				expr_list
+					"%d"
+						
+					expr_list
+						[]
+							a
+								
+							i
+								
+							
+						
+					
+				
+			
+		function call
+			mergesort
+				
+			expr_list
+				a
+					
+				expr_list
+					0
+						
+					expr_list
+						-
+							n
+								
+							1
+								
+							
+						
+					
+				
+			
+		for
+			setup
+				init
+					=
+						i
+							
+						0
+							
+						
+					
+				condition
+					<
+						i
+							
+						n
+							
+						
+					
+				update
+					=
+						i
+							
+						+
+							i
+								
+							1
+								
+							
+						
+					
+				
+			function call
+				printf
+					
+				expr_list
+					"%d "
+						
+					expr_list
+						[]
+							a
+								
+							i
+								
+							
+						
+					
+				
+			
+		return
+			0
+				
+			
+		
+	
