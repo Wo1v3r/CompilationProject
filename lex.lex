@@ -42,6 +42,8 @@
 
 "null"    return NULLVALUE; //
 [0-9]+    return NUM;       //
+(0x|0X)[0-9A-F]+ return NUM;
+[0-1]+b   return NUM;
 
 ";"       return SEMICOLON; //
 "("       return LEFTPAR;   //
