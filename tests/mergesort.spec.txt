@@ -187,13 +187,15 @@ function def
 			
 		
 	block
-		declaration
+		decl list 
 			int
 				
-			array
-				temp
-					
-				50
+			ident_list
+				array
+					temp
+						
+					50
+						
 					
 				
 			
@@ -401,24 +403,22 @@ function def
 	 
 		
 	block
-		declaration
-			int
-				
-			array
-				a
-					
-				30
-					
-				
-			
 		decl list 
 			int
 				
 			ident_list
-				n
+				array
+					a
+						
+					30
+						
 					
 				ident_list
-					i
+					n
+						
+					ident_list
+						i
+							
 						
 					
 				
@@ -543,10 +543,12 @@ function def
 					"%d "
 						
 					expr_list
-						[]
-							a
-								
-							i
+						reference
+							[]
+								a
+									
+								i
+									
 								
 							
 						

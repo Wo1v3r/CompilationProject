@@ -43,8 +43,7 @@ void merge(int a[30],int i1,int j1,int i2,int j2)
 
 int main()
 {
-    int a[30];
-    int n,i;
+    int a[30],n,i;
 
       scanf("%d",&n);
 
@@ -56,7 +55,7 @@ int main()
       
 
       for(i=0;i<n;i = i + 1)
-          printf("%d ",a[i]);
+          printf("%d ",&a[i]);
   
       return 0;
   }
