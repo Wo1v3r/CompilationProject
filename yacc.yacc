@@ -292,10 +292,10 @@ num
   }
 
   int yyerror(const char* error) {
-    if(strcmp(error,"Unkown token") == 0){
-          fprintf(stderr, "Scanner error: %s\n", error);
+    if(strcmp(error,"syntax error") != 0){
+          fprintf(stderr, "Error in line: %d.\nScanner error: Unkown token '%s'\n", linenum, yytext);
           return 0;
     }
-    fprintf(stderr, "Error in line: %d. '%s' was not expected.\n", linenum,yytext);
+    fprintf(stderr, "Error in line: %d. '%s' was not expected.\n", linenum, yytext);
     return 0;
   }
