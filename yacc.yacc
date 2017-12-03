@@ -88,13 +88,14 @@ block_statement
 declaration_statement
       : decl ASSIGN expr  { $$ = makeNode("=", $1, $3); }
       | type list_ident { $$ = makeNode("decl list ", $1, $2);  }
+      | func_type list_ident { $$ = makeNode("decl list ", $1, $2);  }
       | decl
 
 function_call
       : ident LEFTPAR call_arguments RIGHTPAR { $$ = makeNode ("function call", $1, $3); }
 
 function_statement
-      : decl LEFTPAR function_arguments RIGHTPAR block_statement { $$ = makeNode("function def", $1, makeNode("settings", $3, $5)); }
+      : func_decl LEFTPAR function_arguments RIGHTPAR block_statement { $$ = makeNode("function def", $1, makeNode("settings", $3, $5)); }
 
 function_arguments
       : empty_expr
@@ -145,6 +146,7 @@ wrapped_expr
 expr
       : wrapped_expr
       | RETURN expr             { $$ = makeNode("return", $2, NULL); }
+      | RETURN                  { $$ = makeNode("return", NULL, NULL); }
       | NOT  expr               { $$ = makeNode("!",  $2, NULL); }
       | PIPE expr PIPE          { $$ = makeNode("abs", $2, NULL); }
       | expr AND expr           { $$ = makeNode("&&", $1, $3); }        
@@ -176,9 +178,13 @@ expr
 
       | ident                   
       | num
+      
+func_decl
+      : func_type variable         { $$ = makeNode("declaration", $1, $2); }
 
 decl
       : type variable              { $$ = makeNode("declaration", $1, $2); }
+      | func_type variable         { $$ = makeNode("declaration", $1, $2); }
 
 variable
       : ident
@@ -194,13 +200,15 @@ index
       : LEFTBRAC num RIGHTBRAC { $$ = $2; }
 
 type
+      : VOID        { $$ = makeNode(yytext,NULL,NULL); }
+      | STRING      { $$ = makeNode(yytext,NULL,NULL); }
+
+func_type
       : BOOL        { $$ = makeNode(yytext,NULL,NULL); }
       | CHARP       { $$ = makeNode(yytext,NULL,NULL); }
       | CHAR        { $$ = makeNode(yytext,NULL,NULL); }
-      | VOID        { $$ = makeNode(yytext,NULL,NULL); }
       | INTP        { $$ = makeNode(yytext,NULL,NULL); }
       | INT         { $$ = makeNode(yytext,NULL,NULL); }
-      | STRING      { $$ = makeNode(yytext,NULL,NULL); }
 
 ident
       : IDENTIFIER  { $$ = makeNode(yytext,NULL,NULL); }

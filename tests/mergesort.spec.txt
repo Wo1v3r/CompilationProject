@@ -3,7 +3,7 @@ Program
 
 function def
 	declaration
-		void
+		int
 			
 		mergesort
 			
@@ -137,7 +137,7 @@ function def
 	
 function def
 	declaration
-		void
+		int
 			
 		merge
 			
