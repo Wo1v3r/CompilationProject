@@ -1,0 +1,119 @@
+Program
+=======
+
+function def
+	declaration
+		int
+			
+		test
+			
+		
+	dec_list
+		declaration
+			int
+				
+			a
+				
+			
+		
+	block
+		=
+			declaration
+				string
+					
+				flag
+					
+				
+			true
+				
+			
+		decl list 
+			int
+				
+			ident_list
+				grade
+					
+				
+			
+		if
+			!
+				function call
+					testOk
+						
+					 
+						
+					
+				
+			block
+				for
+					setup
+						init
+							=
+								a
+									
+								0
+									
+								
+							
+						condition
+							&&
+								<
+									a
+										
+									100
+										
+									
+								flag
+									
+								
+							
+						update
+							=
+								a
+									
+								function call
+									rand
+										
+									 
+										
+									
+								
+							
+						
+					=
+						grade
+							
+						a
+							
+						
+					
+				if
+					>=
+						grade
+							
+						90
+							
+						
+					block
+						=
+							flag
+								
+							false
+								
+							
+						
+					
+				
+			=
+				grade
+					
+				100
+					
+				
+			
+		return
+			grade
+				
+			
+		
+	
