@@ -1,2 +1,4 @@
- ./clear  2> /dev/null
- lex lex.lex && yacc -v -g -r 'all' -k yacc.yacc && cc -o compiler y.tab.c -ll
+#!/bin/bash
+
+./clear
+lex lex.lex && yacc -v -g -r 'all' -k yacc.yacc && cc -o compiler y.tab.c -ll

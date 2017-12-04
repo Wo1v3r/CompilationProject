@@ -1,1 +1,4 @@
-rm lex.yy.c y.* compiler
+#!/bin/bash
+
+rm lex.yy.c y.* compiler &>/dev/null
+rm tests/*.ast &>/dev/null

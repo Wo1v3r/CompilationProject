@@ -1,10 +1,9 @@
 #!/bin/bash
+./build &> /dev/null
 
-./compiler < ./tests/mergesort.spec.c > ./tests/mergesort.ast
-./compiler < ./tests/if.spec.c > ./tests/if.ast
+for c in ./tests/*.c; do ./compiler < "$c" &> "${c%?}"test.ast ; done
+for t in ./tests/*.test; do diff "$t" ./"$t".ast ; done
 
-diff ./tests/if.spec.txt ./tests/if.ast
-diff ./tests/mergesort.spec.txt ./tests/mergesort.ast
 
 if [ $? -ne 1 ]
 then
