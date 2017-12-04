@@ -1,2 +1,2 @@
 # CompilationProject
-Compilation Project - Hah
+Compilation Project
