@@ -1,6 +1,7 @@
 %{ 
   #include <stdio.h>
   void comment(void);
+  int yyerror(const char*);
   int linenum = 1;
 %}
 
@@ -66,7 +67,7 @@
 [ \t\v\f]*           ; 
 "\n"      ++linenum;
 
-.                             { yyerror("Unkown token"); exit(1); }
+.                             { yyerror("Unknown token"); exit(1); }
 %%
 
 void comment(void) {

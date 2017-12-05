@@ -200,7 +200,7 @@ index
       : LEFTBRAC num RIGHTBRAC { $$ = $2; }
 
 type
-      : VOID        { $$ = makeNode(yytext,NULL,NULL); }
+      : func_type   { $$ = $1; }
       | STRING      { $$ = makeNode(yytext,NULL,NULL); }
 
 func_type
@@ -209,6 +209,7 @@ func_type
       | CHAR        { $$ = makeNode(yytext,NULL,NULL); }
       | INTP        { $$ = makeNode(yytext,NULL,NULL); }
       | INT         { $$ = makeNode(yytext,NULL,NULL); }
+      | VOID        { $$ = makeNode(yytext,NULL,NULL); }
 
 ident
       : IDENTIFIER  { $$ = makeNode(yytext,NULL,NULL); }
@@ -293,7 +294,7 @@ num
 
   int yyerror(const char* error) {
     if(strcmp(error,"syntax error") != 0){
-          fprintf(stderr, "Error in line: %d.\nScanner error: Unkown token '%s'\n", linenum, yytext);
+          fprintf(stderr, "Error in line: %d.\nScanner error: Unknown token '%s'\n", linenum, yytext);
           return 0;
     }
     fprintf(stderr, "Error in line: %d. '%s' was not expected.\n", linenum, yytext);

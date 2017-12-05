@@ -2,12 +2,15 @@
 ./build &> /dev/null
 
 for c in ./tests/*.c; do ./compiler < "$c" &> "${c%?}"test.ast ; done
-for t in ./tests/*.test; do diff "$t" ./"$t".ast ; done
-
-
-if [ $? -ne 1 ]
+for t in ./tests/*.test; 
+do 
+diff "$t" ./"$t".ast ; 
+if [ $? -ne 0 ]
 then
-  echo -e "\033[0;32m All Tests Passed!"
-else
-  echo -e "\033[0;31m Tests failed"
+  echo -e "\033[0;31m Tests failed";
+  exit 1;
 fi
+done
+
+
+echo -e "\033[0;32m All Tests Passed!"
