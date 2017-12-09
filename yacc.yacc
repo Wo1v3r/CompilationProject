@@ -57,7 +57,12 @@ line
 
 command
       : expr SEMICOLON
+      | RETURN return_statement SEMICOLON { $$ = makeNode("return", $2, NULL); }
       | SEMICOLON
+
+return_statement
+      : expr
+      | empty_expr
 
 statement
       : if_statement
@@ -88,13 +93,12 @@ block_statement
 declaration_statement
       : decl ASSIGN expr  { $$ = makeNode("=", $1, $3); }
       | type list_ident { $$ = makeNode("decl list ", $1, $2);  }
-      | func_type list_ident { $$ = makeNode("decl list ", $1, $2);  }
 
 function_call
       : ident LEFTPAR call_arguments RIGHTPAR { $$ = makeNode ("function call", $1, $3); }
 
 function_statement
-      : func_decl LEFTPAR function_arguments RIGHTPAR block_statement { $$ = makeNode("function def", $1, makeNode("settings", $3, $5)); }
+      : decl LEFTPAR function_arguments RIGHTPAR block_statement { $$ = makeNode("function def", $1, makeNode("settings", $3, $5)); }
 
 function_arguments
       : empty_expr
@@ -143,8 +147,6 @@ wrapped_expr
       : LEFTPAR expr RIGHTPAR   { $$ = $2; }
 expr
       : wrapped_expr
-      | RETURN expr             { $$ = makeNode("return", $2, NULL); }
-      | RETURN                  { $$ = makeNode("return", NULL, NULL); }
       | NOT  expr               { $$ = makeNode("!",  $2, NULL); }
       | PIPE expr PIPE          { $$ = makeNode("abs", $2, NULL); }
       | expr AND expr           { $$ = makeNode("&&", $1, $3); }        
@@ -176,9 +178,6 @@ expr
 
       | ident                   
       | num
-      
-func_decl
-      : func_type variable         { $$ = makeNode("declaration", $1, $2); }
 
 decl
       : type variable              { $$ = makeNode("declaration", $1, $2); }
@@ -197,11 +196,8 @@ index
       : LEFTBRAC num RIGHTBRAC { $$ = $2; }
 
 type
-      : func_type
-      | STRING      { $$ = makeNode(yytext,NULL,NULL); }
-
-func_type
       : BOOL        { $$ = makeNode(yytext,NULL,NULL); }
+      | STRING      { $$ = makeNode(yytext,NULL,NULL); }
       | CHARP       { $$ = makeNode(yytext,NULL,NULL); }
       | CHAR        { $$ = makeNode(yytext,NULL,NULL); }
       | INTP        { $$ = makeNode(yytext,NULL,NULL); }
