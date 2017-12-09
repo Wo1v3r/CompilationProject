@@ -2,6 +2,7 @@
   #include <stdio.h>
   #include <string.h>
   #include <stdlib.h>
+  #include <regex.h>
   #include "lex.yy.c"
 
   typedef struct node {
@@ -10,17 +11,33 @@
     struct node* right;
   } node;
 
+  typedef struct linkedList {
+    char* name;
+    char* type;
+    struct linkedList* next;
+  } linkedList;
+
   typedef struct scope {
-    char** tokens;
+    struct linkedList* list;
+    struct linkedList* current;
     struct scope* left;
     struct scope* right;
   } scope;
 
+
   node* makeNode(char* token, node* left, node* right);
-  scope* makeScope(char** tokens, scope* left);
+  linkedList* makeLink(char* token,char* type, linkedList* next);  
+  scope* makeScope(linkedList* list, scope* left);
+
+  void buildTree(node* tree);
+
+  void semantizeTree(node* tree, scope* currentScope);
+  void freeTree(node* tree);
 
   void printTree(node* tree);
-  void freeTree(node* tree);
+  void printScope(scope* scope);
+  void printList(linkedList* list);
+  
   int yyerror(const char*);
   #define YYSTYPE struct node*
 
@@ -32,6 +49,7 @@
 %token  AND OR NOT
 %token  EQUALS GEQUALS LEQUALS GREATER LOWER NEQUALS
 %token  BOOL CHARP CHAR VOID INTP INT STRING
+%token  B_TRUE B_FALSE
 %token  IF ELSE WHILE DO FOR RETURN
 %token  LEFTPAR LEFTBRAC LEFTCURL
 %token  RIGHTPAR RIGHTBRAC RIGHTCURL
@@ -53,7 +71,7 @@
 %%
 
 program
-      : tree { printf("Program\n=======\n\n"); printTree($1); freeTree($1); }
+      : tree { printf("Program\n=======\n\n"); buildTree($1); freeTree($1); }
 
 tree
       : line tree {  $$ = makeNode("line", $1 , $2);   }
@@ -178,6 +196,8 @@ expr
       | STRINGVALUE             { $$ = makeNode(yytext, NULL , NULL); }
       | CHARVALUE               { $$ = makeNode(yytext, NULL , NULL); }
       | NULLVALUE               { $$ = makeNode(yytext,NULL,NULL); }
+      | B_FALSE                 { $$ = makeNode(yytext,NULL,NULL); }
+      | B_TRUE                  { $$ = makeNode(yytext,NULL,NULL); }
 
       | REFERENCE ident         { $$ = makeNode("reference", $2, NULL); }
       | REFERENCE memory        { $$ = makeNode("reference", $2, NULL); }
@@ -229,15 +249,27 @@ num
     return newNode;
   }
 
-  scope* makeScope(char** tokens, scope* left) {
+  linkedList* makeLink(char* token, char* type, linkedList* next) {
+    linkedList* newLink = (linkedList*)malloc(sizeof(linkedList));
+
+    newLink -> name = token;
+    newLink -> type = type;
+    newLink -> next = NULL;
+
+    return newLink;
+  }
+
+  scope* makeScope(linkedList* list, scope* left) {
     scope* newScope = (scope*)malloc(sizeof(scope));
 
-    newScope -> tokens = tokens;
+    newScope -> list = list;
+    newScope -> current = list;
     newScope -> left = left;
     newScope -> right = NULL;
 
     return newScope;
   }
+
 
   void freeTree(node* tree){
       if (tree != NULL) {
@@ -274,6 +306,46 @@ num
     return 1;
   }
 
+  int isNotKeyword(char* token){
+    int length = 37;
+
+    char* keywords[] = {
+      "boolean", "charp"  , "char"   , "void"   , "intp" , "int" , "string" ,"if","false","true",
+      "else"   ,"while"  ,"do","for","return","null","then, else",
+      "line","if","do while","block","decl list ","function call","function def","settings","dec_list",
+      "ident_list","expr_list","setup","inner","init","conditions","update","reference","pointer","declaration","array","[]"
+    };
+
+    for (int i = 0 ; i < length ; i++ ) {
+      if (strcmp(token,keywords[i]) == 0) 
+        return 0;
+    }
+
+    return 1;
+  }
+  int isIdent(char* token){
+    regex_t regex;
+    int reti = regcomp(&regex, "[a-zA-Z_][0-9a-zA-Z_]*", 0);
+
+    if (reti) {
+      fprintf(stderr, "Could not compile regex\n");
+      exit(1);
+    }
+
+    reti = regexec(&regex, token, 0, NULL, 0);
+
+    if (!reti) {
+      return 1;
+    }
+    else if (reti == REG_NOMATCH) {
+      return 0;
+    }
+    else {
+      printf("Regex match failed\n");
+      exit(1);
+    }
+  }
+
   void printTree(node* tree) {
 
     static int tabCount = 0;
@@ -298,6 +370,108 @@ num
         tab(tabCount);
     }
   }
+
+  void printScope(scope* scope) {
+    int count = 0;
+    while (scope) {
+      printf("Scope#%d\n",count++);
+      if (scope->list) printList(scope->list);
+      scope = scope->right;
+    }
+  }
+
+  void printList(linkedList* list){
+    while (list) {
+      printf("type: %s name: %s\n", list->type, list->name);
+      list = list->next;
+    }
+  }
+
+  void buildTree(node* tree){
+    printTree(tree);
+    linkedList*  globalList = makeLink(NULL,NULL,NULL);
+    scope* globalScope= makeScope(globalList,NULL);
+    semantizeTree(tree, globalScope);
+
+    printScope(globalScope);
+  }
+
+  int searchList (char* token, linkedList* list) {
+    if (!list) return 0;
+
+    if (list->name && strcmp(token,list->name) == 0) {
+        return 1;
+    };
+
+    return searchList(token, list->next);
+  }
+
+  int wasDefinedInScope(char* token, scope* scope) {
+    if (scope && searchList(token, scope->list)) return 1;
+
+    return 0;
+  }
+
+  int wasDefined(char* token, scope* scope){
+    if (!scope) return 0;
+
+    if (wasDefinedInScope(token,scope)) return 1;
+
+    return wasDefined(token,scope->left);
+  }
+
+  void declerationList(char* type, node* identList, scope* currentScope) {
+      linkedList* list = currentScope->current;
+      char* name;
+
+      if (!identList) return;
+
+      name = identList->left->token;
+      identList = identList->right;
+
+      if (wasDefinedInScope(name,currentScope)) {
+          printf("ERROR: %s was already defined in this scope!\n", name);
+          return;
+      }
+
+      list->next = makeLink(NULL,NULL,NULL);
+      list->name = name;
+      list->type = type;
+      currentScope->current = list->next;
+
+      return declerationList(type,identList, currentScope);
+  }
+
+  void semantizeTree(node* tree, scope* currentScope) {
+    linkedList* list = currentScope->list;
+    char* name;
+    char* type;
+    char* token = tree->token;
+
+    if (strcmp(token, "block") == 0) {
+      list = makeLink(NULL,NULL,NULL);
+      currentScope->right = makeScope(list,currentScope);
+      currentScope = currentScope->right;
+    }
+    else if ( strcmp(token,"decl list ") == 0) {
+      type = tree->left->token;
+      declerationList(type, tree->right, currentScope);
+    }
+    else if( isNotKeyword(token) && isIdent(token)) {
+      if(!wasDefined(token,currentScope)){
+        printf("Error: %s was used but not defined!\n", token);
+      }
+    }
+
+    if ( tree->left ) {
+      semantizeTree( tree->left , currentScope);
+    }
+
+    if ( tree->right ) {
+      semantizeTree( tree->right, currentScope);
+    }
+  }
+  
 
   int main() {
     return yyparse();

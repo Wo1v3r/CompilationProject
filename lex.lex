@@ -42,6 +42,9 @@
 "for"     return FOR;    
 "return"  return RETURN; 
 
+"false"   return B_FALSE;
+"true"    return B_TRUE;
+
 "null"    return NULLVALUE; 
 [0-9]+    return NUM;       
 (0x|0X)[0-9A-F]+ return NUM;
