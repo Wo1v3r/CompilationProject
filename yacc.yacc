@@ -10,12 +10,20 @@
     struct node* right;
   } node;
 
+  typedef struct scope {
+    char** tokens;
+    struct scope* left;
+    struct scope* right;
+  } scope;
+
   node* makeNode(char* token, node* left, node* right);
+  scope* makeScope(char** tokens, scope* left);
 
   void printTree(node* tree);
   void freeTree(node* tree);
   int yyerror(const char*);
   #define YYSTYPE struct node*
+
 %}
 
 %token  NUM NULLVALUE
@@ -219,6 +227,16 @@ num
     newNode -> right = right;
     newNode -> token = newStr;
     return newNode;
+  }
+
+  scope* makeScope(char** tokens, scope* left) {
+    scope* newScope = (scope*)malloc(sizeof(scope));
+
+    newScope -> tokens = tokens;
+    newScope -> left = left;
+    newScope -> right = NULL;
+
+    return newScope;
   }
 
   void freeTree(node* tree){
