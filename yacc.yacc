@@ -89,7 +89,6 @@ declaration_statement
       : decl ASSIGN expr  { $$ = makeNode("=", $1, $3); }
       | type list_ident { $$ = makeNode("decl list ", $1, $2);  }
       | func_type list_ident { $$ = makeNode("decl list ", $1, $2);  }
-      | decl
 
 function_call
       : ident LEFTPAR call_arguments RIGHTPAR { $$ = makeNode ("function call", $1, $3); }
@@ -116,7 +115,6 @@ list_ident
 list_expr
       : expr { $$ = makeNode("expr_list", $1 , NULL); }
       | expr COMMA list_expr {$$ = makeNode("expr_list", $1, $3); }
-
 
 
 for_statement
@@ -184,7 +182,6 @@ func_decl
 
 decl
       : type variable              { $$ = makeNode("declaration", $1, $2); }
-      | func_type variable         { $$ = makeNode("declaration", $1, $2); }
 
 variable
       : ident
@@ -200,7 +197,7 @@ index
       : LEFTBRAC num RIGHTBRAC { $$ = $2; }
 
 type
-      : func_type   { $$ = $1; }
+      : func_type
       | STRING      { $$ = makeNode(yytext,NULL,NULL); }
 
 func_type
