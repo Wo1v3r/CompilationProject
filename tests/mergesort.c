@@ -1,14 +1,4 @@
-void mergesort(int a[30],int i,int j) {
-    int mid;    
-    if(i<j) {
-        mid=(i+j)/2;
-        mergesort(a,i,mid);
-        mergesort(a,mid+1,j);
-        merge(a,i,mid,mid+1,j);
-    }
-    return 0;
-}
- 
+
 void merge(int a[30],int i1,int j1,int i2,int j2) {
     int temp[50];
     int i,j,k;
@@ -29,6 +19,17 @@ void merge(int a[30],int i1,int j1,int i2,int j2) {
     while(j<=j2) temp[k = k + 1]= a[j = j + 1];
 
     for(i=i1 ; i<=j2 ; i = i + 1) a[i]=temp[j];
+}
+
+void mergesort(int a[30],int i,int j) {
+  int mid;    
+  if(i<j) {
+      mid=(i+j)/2;
+      mergesort(a,i,mid);
+      mergesort(a,mid+1,j);
+      merge(a,i,mid,mid+1,j);
+  }
+  return 0;
 }
 
 int main() {

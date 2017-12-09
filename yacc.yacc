@@ -420,26 +420,31 @@ num
     return wasDefined(token,scope->left);
   }
 
-  void declerationList(char* type, node* identList, scope* currentScope) {
-      linkedList* list = currentScope->current;
-      char* name;
+  void declaration(char* type, char* name, scope* currentScope){
+    linkedList* list = currentScope->current;
 
+    if (wasDefinedInScope(name,currentScope)) {
+      printf("ERROR: %s was already defined in this scope!\n", name);
+      return;
+    }
+
+    list->next = makeLink(NULL,NULL,NULL);
+    list->name = name;
+    list->type = type;
+    currentScope->current = list->next;
+
+  }
+
+  void declarationList(char* type, node* identList, scope* currentScope) {
+      char* name;
       if (!identList) return;
 
       name = identList->left->token;
       identList = identList->right;
 
-      if (wasDefinedInScope(name,currentScope)) {
-          printf("ERROR: %s was already defined in this scope!\n", name);
-          return;
-      }
+      declaration(type,name,currentScope);
 
-      list->next = makeLink(NULL,NULL,NULL);
-      list->name = name;
-      list->type = type;
-      currentScope->current = list->next;
-
-      return declerationList(type,identList, currentScope);
+      return declarationList(type,identList, currentScope);
   }
 
   void semantizeTree(node* tree, scope* currentScope) {
@@ -455,7 +460,13 @@ num
     }
     else if ( strcmp(token,"decl list ") == 0) {
       type = tree->left->token;
-      declerationList(type, tree->right, currentScope);
+      declarationList(type, tree->right, currentScope);
+    }
+    else if ( strcmp(token,"declaration") == 0) {
+      type = tree->left->token;
+      name = tree->right->token;
+
+      declaration(type,name,currentScope);
     }
     else if( isNotKeyword(token) && isIdent(token)) {
       if(!wasDefined(token,currentScope)){
@@ -469,6 +480,12 @@ num
 
     if ( tree->right ) {
       semantizeTree( tree->right, currentScope);
+    }
+
+    if(strcmp(token,"block") == 0) {
+      // currentScope = currentScope-> left;
+      // free(currentScope->right);
+      // currentScope->right = NULL;
     }
   }
   
