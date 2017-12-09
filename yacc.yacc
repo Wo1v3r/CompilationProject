@@ -16,8 +16,15 @@
     struct scope* right;
   } scope;
 
+  typedef struct construct {
+    struct scope* lastScope;
+    struct node* left;
+    struct node* right;
+  } construct;
+
+  construct* makeConstruct(char* token, scope* lastScope, node* left, node* right);
   node* makeNode(char* token, node* left, node* right);
-  scope* makeScope(char** tokens, scope* left);
+  scope* makeScope(scope* left);
 
   void printTree(node* tree);
   void freeTree(node* tree);
@@ -229,10 +236,9 @@ num
     return newNode;
   }
 
-  scope* makeScope(char** tokens, scope* left) {
+  scope* makeScope(scope* left) {
     scope* newScope = (scope*)malloc(sizeof(scope));
 
-    newScope -> tokens = tokens;
     newScope -> left = left;
     newScope -> right = NULL;
 
