@@ -396,34 +396,36 @@ num
     printScope(globalScope);
   }
 
-  int searchList (char* token, linkedList* list) {
-    if (!list) return 0;
+  char* searchList (char* token, linkedList* list) {
+    if (!list) return NULL;
 
     if (list->name && strcmp(token,list->name) == 0) {
-        return 1;
+        return list->type;
     };
 
     return searchList(token, list->next);
   }
 
-  int wasDefinedInScope(char* token, scope* scope) {
-    if (scope && searchList(token, scope->list)) return 1;
-
-    return 0;
+  char* typeOfInScope(char* token, scope* scope) {
+    if (!scope) return NULL;
+    return searchList(token,scope->list);
   }
 
-  int wasDefined(char* token, scope* scope){
-    if (!scope) return 0;
+  char* typeOf(char* token, scope* scope) {
+    char* type;
 
-    if (wasDefinedInScope(token,scope)) return 1;
+    if (!scope) return NULL;
 
-    return wasDefined(token,scope->left);
+    type = typeOfInScope(token,scope);
+    if (type) return type;
+
+    return typeOf(token,scope->left);
   }
 
   void declaration(char* type, char* name, scope* currentScope){
     linkedList* list = currentScope->current;
 
-    if (wasDefinedInScope(name,currentScope)) {
+    if (typeOfInScope(name,currentScope)) {
       printf("ERROR: %s was already defined in this scope!\n", name);
       return;
     }
@@ -461,15 +463,21 @@ num
     else if ( strcmp(token,"decl list ") == 0) {
       type = tree->left->token;
       declarationList(type, tree->right, currentScope);
+      return; //No need to go down, declList does it
     }
     else if ( strcmp(token,"declaration") == 0) {
       type = tree->left->token;
       name = tree->right->token;
 
       declaration(type,name,currentScope);
+      return; //No need to go down, decl does it
     }
     else if( isNotKeyword(token) && isIdent(token)) {
-      if(!wasDefined(token,currentScope)){
+      type = typeOf(token,currentScope);
+      if (type){
+        printf("TypeOf %s: %s\n",token,type);
+      }
+      else {
         printf("Error: %s was used but not defined!\n", token);
       }
     }
