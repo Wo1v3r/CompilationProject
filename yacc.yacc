@@ -307,12 +307,12 @@ num
   }
 
   int isNotKeyword(char* token){
-    int length = 37;
+    int length = 36;
 
     char* keywords[] = {
       "boolean", "charp"  , "char"   , "void"   , "intp" , "int" , "string" ,"if","false","true",
       "else"   ,"while"  ,"do","for","return","null","then, else",
-      "line","if","do while","block","decl list ","function call","function def","settings","dec_list",
+      "line","if","do while","block","decl list ","function call","settings","dec_list",
       "ident_list","expr_list","setup","inner","init","conditions","update","reference","pointer","declaration","array","[]"
     };
 
@@ -437,6 +437,17 @@ num
 
   }
 
+  void decl_list(node* tree, scope* currentScope) {
+    char *type, *name;
+    if (!tree) return;
+
+    type = tree->left->left->token;
+    name = tree->left->right->token;
+
+    declaration(type,name,currentScope);
+    decl_list(tree->right, currentScope);
+  }
+
   void declarationList(char* type, node* identList, scope* currentScope) {
       char* name;
       if (!identList) return;
@@ -450,27 +461,38 @@ num
   }
 
   void semantizeTree(node* tree, scope* currentScope) {
-    linkedList* list = currentScope->list;
-    char* name;
-    char* type;
-    char* token = tree->token;
+    linkedList* list;
+    char *name,*type,*token = tree->token;
 
     if (strcmp(token, "block") == 0) {
       list = makeLink(NULL,NULL,NULL);
       currentScope->right = makeScope(list,currentScope);
       currentScope = currentScope->right;
     }
+    else if (strcmp(token, "function def") == 0) {
+      type = tree->left->left->token;
+      name = tree->left->right->token;
+      declaration(type,name,currentScope);
+
+      list = makeLink(NULL,NULL,NULL);
+      currentScope->right = makeScope(list,currentScope);
+      currentScope = currentScope->right;
+
+      decl_list(tree->right->left,currentScope);
+
+      tree = tree->right->right->left;
+    }
     else if ( strcmp(token,"decl list ") == 0) {
       type = tree->left->token;
       declarationList(type, tree->right, currentScope);
-      return; //No need to go down, declList does it
+      return;
     }
     else if ( strcmp(token,"declaration") == 0) {
       type = tree->left->token;
       name = tree->right->token;
 
       declaration(type,name,currentScope);
-      return; //No need to go down, decl does it
+      return;
     }
     else if( isNotKeyword(token) && isIdent(token)) {
       type = typeOf(token,currentScope);
