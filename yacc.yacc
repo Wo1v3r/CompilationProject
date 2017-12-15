@@ -11,9 +11,15 @@
     struct node* right;
   } node;
 
+  typedef struct typesList {
+    char* type;
+    struct typesList* next;
+  } typesList;
+
   typedef struct linkedList {
     char* name;
     char* type;
+    typesList* types;
     struct linkedList* next;
   } linkedList;
 
@@ -381,8 +387,18 @@ num
   }
 
   void printList(linkedList* list){
-    while (list) {
+    typesList* currentType;
+
+    while (list && list->name) {
+
       printf("type: %s name: %s\n", list->type, list->name);
+      currentType = list->types;
+
+      while (currentType && currentType->type) {
+        printf("\targ type: %s\n", currentType->type);
+        currentType= currentType->next;
+      }
+
       list = list->next;
     }
   }
@@ -422,7 +438,7 @@ num
     return typeOf(token,scope->left);
   }
 
-  void declaration(char* type, char* name, scope* currentScope){
+  void declaration(char* type, char* name, typesList* types, scope* currentScope){
     linkedList* list = currentScope->current;
 
     if (typeOfInScope(name,currentScope)) {
@@ -433,20 +449,23 @@ num
     list->next = makeLink(NULL,NULL,NULL);
     list->name = name;
     list->type = type;
+    list->types = types;
     currentScope->current = list->next;
 
   }
 
   void decl_list(node* tree, scope* currentScope) {
     char *type, *name;
-    if (!tree) return;
+    if (!tree || !tree ->left) return;
 
     type = tree->left->left->token;
     name = tree->left->right->token;
 
-    declaration(type,name,currentScope);
+    declaration(type,name,NULL,currentScope);
     decl_list(tree->right, currentScope);
   }
+
+  
 
   void declarationList(char* type, node* identList, scope* currentScope) {
       char* name;
@@ -455,53 +474,113 @@ num
       name = identList->left->token;
       identList = identList->right;
 
-      declaration(type,name,currentScope);
+      declaration(type,name,NULL,currentScope);
 
       return declarationList(type,identList, currentScope);
   }
 
-  void semantizeTree(node* tree, scope* currentScope) {
-    linkedList* list;
-    char *name,*type,*token = tree->token;
+  int isVoid(node* tree ,typesList* types) {
 
-    if (strcmp(token, "block") == 0) {
-      list = makeLink(NULL,NULL,NULL);
+    if (!tree || !tree->left) {
+      types->type = (char*) malloc(5);
+      strcpy(types->type,"void");
+      return 1;
+    }
+    return 0;
+  }
+
+  void getTypes(node* tree, typesList* types) {
+    char *type;
+
+    if (!tree) return;
+
+    type = tree->left->left->token;
+
+    types-> type = type;
+    types -> next = (typesList*)malloc(sizeof(typesList));
+
+    return getTypes(tree->right, types -> next);
+  }
+
+
+  void semantizeBlock(scope* currentScope) {
+      linkedList* list = makeLink(NULL,NULL,NULL);
       currentScope->right = makeScope(list,currentScope);
       currentScope = currentScope->right;
-    }
-    else if (strcmp(token, "function def") == 0) {
+  }
+
+  void semantizeDeclList(node * tree, scope* currentScope){
+      char* type = tree->left->token;
+      declarationList(type, tree->right, currentScope);
+  }
+  
+  void semantizeDeclaration(node* tree, scope* currentScope){
+      char *type, *name;
+
+      type = tree->left->token;
+      name = tree->right->token;
+
+      declaration(type,name,NULL,currentScope);
+  }
+
+  void semantizeIdentifier(node* tree, scope* currentScope) {
+      char* type = typeOf(tree->token,currentScope);
+
+      if (type){
+        printf("TypeOf %s: %s\n",tree->token,type);
+      }
+      else {
+        printf("Error: %s was used but not defined!\n", tree->token);
+      }
+  }
+
+  void semantizeFunctionDef(node* tree, scope* currentScope){
+      char *name, *type;
+      typesList* types = (typesList*)malloc(sizeof(typesList));
+      linkedList* list = makeLink(NULL,NULL,NULL);
+
+      if (! isVoid(tree->right->left,types) )
+        getTypes(tree->right->left,types);
+
       type = tree->left->left->token;
       name = tree->left->right->token;
-      declaration(type,name,currentScope);
 
-      list = makeLink(NULL,NULL,NULL);
+      declaration(type,name,types,currentScope);
+
       currentScope->right = makeScope(list,currentScope);
       currentScope = currentScope->right;
 
       decl_list(tree->right->left,currentScope);
+  }
 
+
+  void semantizeTree(node* tree, scope* currentScope) {
+    linkedList* list;
+    typesList* types;
+    char *name,*type,*token = tree->token;
+
+    if (strcmp(token, "block") == 0) {
+      semantizeBlock(currentScope);
+    }
+
+    else if (strcmp(token, "function def") == 0) {
+      semantizeFunctionDef(tree,currentScope);
+      currentScope = currentScope->right;
       tree = tree->right->right->left;
     }
-    else if ( strcmp(token,"decl list ") == 0) {
-      type = tree->left->token;
-      declarationList(type, tree->right, currentScope);
-      return;
-    }
-    else if ( strcmp(token,"declaration") == 0) {
-      type = tree->left->token;
-      name = tree->right->token;
 
-      declaration(type,name,currentScope);
+    else if ( strcmp(token,"decl list ") == 0) {
+      semantizeDeclList(tree,currentScope);
       return;
     }
+
+    else if ( strcmp(token,"declaration") == 0) {
+      semantizeDeclaration(tree,currentScope);
+      return;
+    }
+
     else if( isNotKeyword(token) && isIdent(token)) {
-      type = typeOf(token,currentScope);
-      if (type){
-        printf("TypeOf %s: %s\n",token,type);
-      }
-      else {
-        printf("Error: %s was used but not defined!\n", token);
-      }
+      semantizeIdentifier(tree,currentScope);
     }
 
     if ( tree->left ) {
