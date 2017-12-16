@@ -586,6 +586,14 @@ num
       return 0;
   }
 
+  char* sameTypes(char* token){
+    if (intInt(token)) return "int";
+    if (boolBool(token)) return "bool";
+    if (equality(token)) return "equality";
+
+    return NULL;
+  }
+
   void semantizeBlock(scope* currentScope) {
       linkedList* list = makeLink(NULL,NULL,NULL);
       currentScope->right = makeScope(list,currentScope);
@@ -647,8 +655,9 @@ num
     return typeOf(tree->token,currentScope);
   }
 
+  void semantizeSameTypes(node* tree, scope* currentScope) {
 
-  void semantizeOperator(node* tree, scope* currentScope, char* type) {
+    char* type = sameTypes(tree->token);
     char* type1 = semantizeExpression(tree->left,currentScope);
     char* type2 = semantizeExpression(tree->right,currentScope);
 
@@ -662,7 +671,7 @@ num
       return;
     }
 
-    if (type && strcmp(type1,type) != 0) {
+    if (strcmp(type,"equality") != 0 && strcmp(type1,type) != 0) {
       printf("\nError: %s should be type %s\n", type1, type);
     }
   }
@@ -692,17 +701,8 @@ num
       return;
     }
 
-    else if (boolBool(token)) {
-      semantizeOperator(tree,currentScope, "boolean");
-    }
-
-    else if( intInt(token)) {
-      semantizeOperator(tree,currentScope,"int");
-
-    }
-
-    else if (equality(token)) {
-      semantizeOperator(tree,currentScope,NULL);
+    else if ( sameTypes(token) ) {
+      semantizeSameTypes(tree,currentScope);
     }
 
     else if( isNotKeyword(token) && isIdent(token)) {
