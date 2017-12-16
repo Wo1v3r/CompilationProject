@@ -263,11 +263,6 @@
       }
   }
 
-  void semantizeReturnType(node* tree, char* type){
-    printf("\nType of function: %s\n", type);
-    printTree(tree);
-  }
-
   void semantizeFunctionDef(node* tree, scope* currentScope){
       char *name, *type;
       typesList* types = (typesList*)malloc(sizeof(typesList));
@@ -283,6 +278,8 @@
 
       currentScope->right = makeScope(list,currentScope);
       currentScope = currentScope->right;
+
+      currentScope -> returnType = type;
 
       decl_list(tree->right->left,currentScope);
   }
@@ -387,16 +384,30 @@
     }
   }
 
+  void semantizeReturnType(node* tree, scope* currentScope){
+    char* funcType = currentScope->returnType;
+    char* returnType;
+    if (strcmp(tree-> token," ") == 0)
+      returnType = "void";
+    else
+      returnType= semantizeExpression(tree,currentScope);
+
+    if (strcmp(funcType,returnType) != 0) {
+      printf("Return type '%s' must match function return type '%s'\n", returnType, funcType );
+    }
+
+  }
+
   void semantizeTree(node* tree, scope* currentScope) {
     linkedList* list;
     typesList* types;
     char *name,*type,*token = tree->token;
 
-    if (strcmp(token, "block") == 0) {
-      semantizeBlock(currentScope);
-    }
+    // if (strcmp(token, "block") == 0) {
+    //   semantizeBlock(currentScope);
+    // }
 
-    else if (strcmp(token, "function def") == 0) {
+     if (strcmp(token, "function def") == 0) {
       semantizeFunctionDef(tree,currentScope);
       currentScope = currentScope->right;
       tree = tree->right->right->left;
@@ -434,6 +445,9 @@
     }
     else if( strcmp(token, "condition") == 0) {
       semantizeCondition(tree->left, currentScope);
+    }
+    else if( strcmp(token, "return") == 0) {
+      semantizeReturnType(tree->left, currentScope);
     }
     else if( isNotKeyword(token) && isIdent(token)) {
       semantizeIdentifier(tree,currentScope);

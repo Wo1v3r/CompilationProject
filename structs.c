@@ -24,6 +24,9 @@
     struct linkedList* current;
     struct scope* left;
     struct scope* right;
+    
+    char* returnType;
+
   } scope;
 
 
@@ -54,6 +57,7 @@
     newScope -> current = list;
     newScope -> left = left;
     newScope -> right = NULL;
+    newScope -> returnType = NULL;
 
     return newScope;
   }
