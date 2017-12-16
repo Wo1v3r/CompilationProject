@@ -232,12 +232,6 @@
     return NULL;
   }
 
-  void semantizeBlock(scope* currentScope) {
-      linkedList* list = makeLink(NULL,NULL,NULL);
-      currentScope->right = makeScope(list,currentScope);
-      currentScope = currentScope->right;
-  }
-
   void semantizeDeclList(node * tree, scope* currentScope){
       char* type = tree->left->token;
       declarationList(type, tree->right, currentScope);
@@ -398,14 +392,24 @@
 
   }
 
+  void semantizeAssignment(node* tree, scope* currentScope) {
+    char* type;
+    char* assignType = semantizeExpression(tree->right,currentScope);
+
+    if (strcmp(tree->left->token,"declaration") != 0) 
+      type = typeOf(tree->left->token,currentScope);
+    else
+      type = tree->left->left->token;
+
+    if (strcmp(type,assignType) != 0) {
+      printf("Error: %s was assigned to type of %s\n", assignType, type );
+    }
+  }
+
   void semantizeTree(node* tree, scope* currentScope) {
     linkedList* list;
     typesList* types;
     char *name,*type,*token = tree->token;
-
-    // if (strcmp(token, "block") == 0) {
-    //   semantizeBlock(currentScope);
-    // }
 
      if (strcmp(token, "function def") == 0) {
       semantizeFunctionDef(tree,currentScope);
@@ -448,6 +452,9 @@
     }
     else if( strcmp(token, "return") == 0) {
       semantizeReturnType(tree->left, currentScope);
+    }
+    else if( strcmp(token, "=") == 0) { 
+      semantizeAssignment(tree,currentScope);
     }
     else if( isNotKeyword(token) && isIdent(token)) {
       semantizeIdentifier(tree,currentScope);
