@@ -2,6 +2,7 @@
   #include <stdio.h>
   #include <string.h>
   #include <stdlib.h>
+  #include <ctype.h>
   #include <regex.h>
   #include "lex.yy.c"
 
@@ -329,6 +330,7 @@ num
 
     return 1;
   }
+
   int isIdent(char* token){
     regex_t regex;
     int reti = regcomp(&regex, "[a-zA-Z_][0-9a-zA-Z_]*", 0);
@@ -404,9 +406,13 @@ num
   }
 
   void buildTree(node* tree){
+    printf("AST:\n\n");
+
     printTree(tree);
     linkedList*  globalList = makeLink(NULL,NULL,NULL);
     scope* globalScope= makeScope(globalList,NULL);
+
+    printf("Semantics:\n\n");
     semantizeTree(tree, globalScope);
 
     printScope(globalScope);
@@ -502,6 +508,83 @@ num
     return getTypes(tree->right, types -> next);
   }
 
+  int isBoolean(char* token) {
+    int length = 9;
+
+    char* keywords[] = {
+      "||", "&&","==","!=","!","<","<=",">",">="
+    };
+
+    for (int i = 0 ; i < length ; i++ ) {
+      if (strcmp(token,keywords[i]) == 0) 
+        return 1;
+    }
+
+    return 0;
+  }
+
+  int isInt(char* token) {
+    int length = 5;
+
+    char* keywords[] = {
+      "+", "-", "*", "/", "abs"
+    };
+
+    if (strcmp(token,"0") == 0) return 1;
+
+    if (atoi(token)) return 1;
+
+    for (int i = 0 ; i < length ; i++ ) {
+      if (strcmp(token,keywords[i]) == 0) 
+        return 1;
+    }
+
+    return 0;
+  }
+
+  int equality(char* token) {
+    int length = 2 ;
+
+    char* keywords[] = {
+      "!=", "=="
+    };
+
+    for (int i = 0 ; i < length ; i++) {
+      if (strcmp(token,keywords[i]) == 0) return 1;
+    }
+
+    return 0;
+  }
+
+  int boolBool(char* token) {
+    int length = 2;
+
+    char* keywords[] = {
+      "||", "&&"
+    };
+
+    for (int i = 0 ; i < length ; i++ ) {
+      if (strcmp(token,keywords[i]) == 0) 
+        return 1;
+    }
+
+    return 0;
+  }
+
+  int intInt(char* token) {
+      int length = 8;
+
+      char* keywords[] = {
+        ">", "<", ">=", "<=", "*", "/", "+", "-"
+      };
+
+      for (int i = 0 ; i < length ; i++ ) {
+        if (strcmp(token,keywords[i]) == 0) 
+          return 1;
+      }
+
+      return 0;
+  }
 
   void semantizeBlock(scope* currentScope) {
       linkedList* list = makeLink(NULL,NULL,NULL);
@@ -553,6 +636,31 @@ num
       decl_list(tree->right->left,currentScope);
   }
 
+  char* semantizeExpression(node* tree, scope* currentScope) {
+
+    if (isBoolean(tree->token)) return "boolean";
+    if (isInt(tree->token)) return "int";
+    
+    if (strcmp(tree->token, "function call") == 0)
+      return typeOf(tree->left->token,currentScope);
+
+    return typeOf(tree->token,currentScope);
+  }
+
+
+  void semantizeOperator(node* tree, scope* currentScope) {
+    char* type1 = semantizeExpression(tree->left,currentScope);
+    char* type2 = semantizeExpression(tree->right,currentScope);
+
+    if (!type1 || !type2) {
+      printf("\nError: No type for %s\n", tree->token);
+      return;
+    }
+
+    if (strcmp(type1,type2) != 0) {
+      printf("\nError: <%s> %s <%s>\n",type1, tree->token, type2);
+    }
+  }
 
   void semantizeTree(node* tree, scope* currentScope) {
     linkedList* list;
@@ -577,6 +685,10 @@ num
     else if ( strcmp(token,"declaration") == 0) {
       semantizeDeclaration(tree,currentScope);
       return;
+    }
+
+    else if (boolBool(token) || intInt(token) || equality(token)) {
+      semantizeOperator(tree,currentScope);
     }
 
     else if( isNotKeyword(token) && isIdent(token)) {
