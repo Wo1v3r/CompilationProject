@@ -648,7 +648,7 @@ num
   }
 
 
-  void semantizeOperator(node* tree, scope* currentScope) {
+  void semantizeOperator(node* tree, scope* currentScope, char* type) {
     char* type1 = semantizeExpression(tree->left,currentScope);
     char* type2 = semantizeExpression(tree->right,currentScope);
 
@@ -659,6 +659,11 @@ num
 
     if (strcmp(type1,type2) != 0) {
       printf("\nError: <%s> %s <%s>\n",type1, tree->token, type2);
+      return;
+    }
+
+    if (type && strcmp(type1,type) != 0) {
+      printf("\nError: %s should be type %s\n", type1, type);
     }
   }
 
@@ -687,8 +692,17 @@ num
       return;
     }
 
-    else if (boolBool(token) || intInt(token) || equality(token)) {
-      semantizeOperator(tree,currentScope);
+    else if (boolBool(token)) {
+      semantizeOperator(tree,currentScope, "boolean");
+    }
+
+    else if( intInt(token)) {
+      semantizeOperator(tree,currentScope,"int");
+
+    }
+
+    else if (equality(token)) {
+      semantizeOperator(tree,currentScope,NULL);
     }
 
     else if( isNotKeyword(token) && isIdent(token)) {
