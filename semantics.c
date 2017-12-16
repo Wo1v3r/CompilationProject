@@ -295,6 +295,11 @@
       type = tree->left->left->token;
       name = tree->left->right->token;
 
+      if (strcmp(type,"string") == 0) {
+        printf("Function %s can not return a string\n", name);
+        return;
+      }
+
       declaration(type,name,types,currentScope);
 
       currentScope->right = makeScope(list,currentScope);
