@@ -67,6 +67,33 @@
     return typeOf(token,scope->left);
   }
 
+
+  typesList* searchListForTypes (char* token, linkedList* list) {
+    if (!list) return NULL;
+
+    if (list->name && strcmp(token,list->name) == 0) {
+        return list->types;
+    };
+
+    return searchListForTypes(token, list->next);
+  }
+
+  typesList* typesOfInScope(char* token, scope* scope) {
+    if (!scope) return NULL;
+    return searchListForTypes(token,scope->list);
+  }
+
+  typesList* typesOf(char* token, scope* scope) {
+    typesList* types;
+
+    if (!scope) return NULL;
+
+    types = typesOfInScope(token,scope);
+    if (types) return types;
+
+    return typesOf(token,scope->left);
+  }
+
   void declaration(char* type, char* name, typesList* types, scope* currentScope){
     linkedList* list = currentScope->current;
 
@@ -406,17 +433,58 @@
     }
   }
 
+  void semantizeFunctionCall(node* tree,scope* currentScope) {
+    int countArgs = 0;
+
+    char* funcName = tree->left->token;
+    char *type1, *type2;
+
+    typesList* typesList = typesOfInScope(funcName,currentScope);
+    node* exprList = tree->right;
+
+    printTree(exprList);
+
+    if (strcmp(typesList->type,"void") == 0 ) {
+
+      if(strcmp(exprList->token, " ") != 0 ) printf("Function %s should be called with no arguments\n",funcName);
+
+      return;
+    }
+
+    while(typesList->type && exprList) {
+      countArgs++;
+      type1 = typesList->type;
+      type2 = semantizeExpression(exprList->left,currentScope);
+
+      if (strcmp(type1,type2) != 0) {
+        printf("Function %s call not matching signature: Argument %d should be %s\n",
+          funcName,countArgs,type1);
+        return;
+      }
+      typesList = typesList->next;
+      exprList = exprList->right;
+    }
+
+    if (typesList->type || exprList) {
+      printf("FUCK YOU %d %d %d \n",countArgs,countArgs,countArgs);
+    }
+
+
+  }
   void semantizeTree(node* tree, scope* currentScope) {
     linkedList* list;
     typesList* types;
     char *name,*type,*token = tree->token;
 
-     if (strcmp(token, "function def") == 0) {
+    if (strcmp(token, "function def") == 0) {
       semantizeFunctionDef(tree,currentScope);
       currentScope = currentScope->right;
       tree = tree->right->right->left;
     }
 
+    else if (strcmp(token, "function call") == 0) {
+      semantizeFunctionCall(tree,currentScope);
+    }
     else if ( strcmp(token,"decl list ") == 0) {
       semantizeDeclList(tree,currentScope);
       return;
