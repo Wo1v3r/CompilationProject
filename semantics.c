@@ -377,9 +377,17 @@
       decl_list(tree->right->left,currentScope);
   }
 
+
+  int isNull(char* token){    
+    if (strcmp(token,"null") == 0) return 1; 
+
+    return 0;
+  }
+
   int checkNull(char* actualType, char* token){
-    if (strcmp(token,"null") != 0) return 1; 
-  
+
+    if (!isNull(token)) return 1;
+
     if (strcmp(actualType,"intp") == 0) return 0;
     if (strcmp(actualType,"charp") == 0) return 0;
 
@@ -421,16 +429,17 @@
   }
 
   void semantizeSameTypes(node* tree, scope* currentScope) {
-
     char* type = sameTypes(tree->token);
     char* type1 = semantizeExpression(tree->left,currentScope);
     char* type2 = semantizeExpression(tree->right,currentScope);
 
-    if (!type1 || !type2) {
-      printf("\nError: No type for %s\n", tree->token);
+    if (
+        (isNull(tree->right->token) && isNull(tree->left->token)) ||
+        !checkNull(type1,tree->right->token) ||
+        !checkNull(type2,tree->left->token)
+        ){ 
       return;
     }
-
     if (strcmp(type1,type2) != 0) {
       printf("\nError: <%s> %s <%s>\n",type1, tree->token, type2);
       return;
@@ -509,7 +518,7 @@
     else
       returnType= semantizeExpression(tree,currentScope);
 
-    if (strcmp(funcType,returnType) != 0) {
+    if (checkNull(funcType,tree->token) && strcmp(funcType,returnType) != 0) {
       printf("Return type '%s' must match function return type '%s'\n", returnType, funcType );
     }
 
@@ -527,7 +536,7 @@
       type = typeOf(tree->left->token,currentScope);
 
 
-    if (strcmp(type,assignType) != 0) {
+    if (checkNull(type,tree->right->token) && strcmp(type,assignType) != 0) {
       printf("Error: %s was assigned to type of %s\n", assignType, type );
     }
   }
@@ -599,6 +608,10 @@
 
 
   }
+  void mainExists() { 
+    if (!mainFlag) printf("Main function was not defined\n");
+  }
+
   void semantizeTree(node* tree, scope* currentScope) {
     linkedList* list;
     typesList* types;
