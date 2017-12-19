@@ -162,7 +162,7 @@ expr
       | expr DIV   expr         { $$ = makeNode("/", $1, $3); }
 
       | ident ASSIGN expr       { $$ = makeNode("=", $1, $3); }
-      | memory ASSIGN expr      { $$ = makeNode("=", $1, $2); }  
+      | memory ASSIGN expr      { $$ = makeNode("=", $1, $3); }  
       | memory
 
 

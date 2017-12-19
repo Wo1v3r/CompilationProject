@@ -1,4 +1,8 @@
   #include "print.c"
+  int mainFlag = 0;
+
+  int isChar(char* token);
+  int isString(char* token);
   
   int isNotKeyword(char* token){
     int length = 36;
@@ -20,6 +24,9 @@
 
   int isIdent(char* token){
     regex_t regex;
+
+    if (isString(token) || isChar(token)) return 0;
+    
     int reti = regcomp(&regex, "[a-zA-Z_][0-9a-zA-Z_]*", 0);
 
     if (reti) {
@@ -59,6 +66,8 @@
   char* typeOf(char* token, scope* scope) {
     char* type;
 
+    if (strcmp(token,"[]") == 0) return "char";
+
     if (!scope) return NULL;
 
     type = typeOfInScope(token,scope);
@@ -76,6 +85,13 @@
     };
 
     return searchListForTypes(token, list->next);
+  }
+
+  int typesListLength(typesList* list) {
+    if (list) {
+      return 1 + typesListLength(list->next);
+    }
+    return 0;
   }
 
   typesList* typesOfInScope(char* token, scope* scope) {
@@ -152,8 +168,23 @@
 
     types-> type = type;
     types -> next = (typesList*)malloc(sizeof(typesList));
+    types -> next -> type = NULL;
 
     return getTypes(tree->right, types -> next);
+  }
+
+  char* pointerOf(char* type){
+    if (strcmp(type,"int") == 0) return "intp";
+    if (strcmp(type,"char") == 0) return "charp";
+
+    return NULL;
+  }
+
+  char* referenceOf(char* type){
+    if (strcmp(type,"intp") == 0) return "int";
+    if (strcmp(type,"charp") == 0) return "char";
+
+    return NULL;
   }
 
   int isBoolean(char* token) {
@@ -186,6 +217,24 @@
       if (strcmp(token,keywords[i]) == 0) 
         return 1;
     }
+
+    return 0;
+  }
+
+  int isString(char* token) {
+    if (token && token[0] == '"' && token[strlen(token) - 1] == '"') 
+      return 1;
+
+    return 0;
+  }
+
+  int isChar(char* token){
+
+    if (strcmp(token,"[]") == 0) 
+      return 1;
+
+    if (token && token[0] == '\'' && token[2] == '\'') 
+      return 1;
 
     return 0;
   }
@@ -284,6 +333,22 @@
       }
   }
 
+  int checkMain(char* token, typesList* types) {
+    if (strcmp(token,"main") == 0) {
+      if (strcmp(types->type, "void") != 0) {
+        printf("Main function cannot have any arguments\n");
+        return 1;
+      }
+      if (mainFlag) {
+        printf("Main function can be defined only once in a program\n");
+        return 1;
+      }
+      mainFlag = 1;
+    }
+
+    return 0;
+  }
+
   void semantizeFunctionDef(node* tree, scope* currentScope){
       char *name, *type;
       typesList* types = (typesList*)malloc(sizeof(typesList));
@@ -294,6 +359,8 @@
 
       type = tree->left->left->token;
       name = tree->left->right->token;
+
+      checkMain(name,types);
 
       if (strcmp(type,"string") == 0) {
         printf("Function %s can not return a string\n", name);
@@ -310,13 +377,37 @@
       decl_list(tree->right->left,currentScope);
   }
 
+  int checkNull(char* actualType, char* token){
+    if (strcmp(token,"null") != 0) return 1; 
+  
+    if (strcmp(actualType,"intp") == 0) return 0;
+    if (strcmp(actualType,"charp") == 0) return 0;
+
+    printf("Error: Null can be assigned only to intp | charp\n");
+    return 0; //TODO: Should exit here
+  }
+
   char* semantizeExpression(node* tree, scope* currentScope) {
+    char* type;
 
     if (isBoolean(tree->token)) return "boolean";
     if (isInt(tree->token)) return "int";
+    if (isString(tree->token)) return "string";
+    if (isChar(tree->token)) return "char";
+
     
     if (strcmp(tree->token, "function call") == 0)
       return typeOf(tree->left->token,currentScope);
+
+    if (strcmp(tree->token, "reference") == 0){
+      type = typeOf(tree->left->token,currentScope);
+      return pointerOf(type);
+    }
+
+    if (strcmp(tree->token, "pointer") == 0){
+      type = typeOf(tree->left->token,currentScope);
+      return referenceOf(type);
+    }
 
     return typeOf(tree->token,currentScope);
   }
@@ -428,50 +519,82 @@
     char* type;
     char* assignType = semantizeExpression(tree->right,currentScope);
 
-    if (strcmp(tree->left->token,"declaration") != 0) 
-      type = typeOf(tree->left->token,currentScope);
-    else
+    if (strcmp(tree->left->token,"declaration") == 0)
       type = tree->left->left->token;
+    else if (strcmp(tree->left->token,"[]") == 0)
+      type = "char";
+    else
+      type = typeOf(tree->left->token,currentScope);
+
 
     if (strcmp(type,assignType) != 0) {
       printf("Error: %s was assigned to type of %s\n", assignType, type );
     }
   }
 
+  void semantizeIndex(node* tree, scope* currentScope) {
+    char* type1;
+    char* type2;
+
+    type1 = semantizeExpression(tree->left, currentScope);
+    type2 = semantizeExpression(tree->right, currentScope);
+
+    if ( strcmp(type1, "string") != 0 ) {
+      printf("%s can not be accessed with an index\n", type1);
+    }
+
+    if ( strcmp(type2, "int") != 0 ) {
+      printf("Index can only be an integer\n");
+    }
+
+  }
+
   void semantizeFunctionCall(node* tree,scope* currentScope) {
     int countArgs = 0;
-
+    int neededLength;
     char* funcName = tree->left->token;
     char *type1, *type2;
 
-    typesList* typesList = typesOfInScope(funcName,currentScope);
-    node* exprList = tree->right;
 
-    printTree(exprList);
+    typesList* typesList = typesOf(funcName,currentScope);
 
-    if (strcmp(typesList->type,"void") == 0 ) {
-
-      if(strcmp(exprList->token, " ") != 0 ) printf("Function %s should be called with no arguments\n",funcName);
-
+    if (!typesList) {
+      printf("%s is not a function!\n", funcName);
       return;
     }
 
-    while(typesList->type && exprList) {
-      countArgs++;
-      type1 = typesList->type;
-      type2 = semantizeExpression(exprList->left,currentScope);
+    neededLength = typesListLength(typesList);
 
-      if (strcmp(type1,type2) != 0) {
+    node* exprList = tree->right;
+
+    if (strcmp(typesList->type,"void") == 0 ){
+      if (strcmp(exprList->token, " ") != 0 ) {
+        printf("Function %s should be called with no arguments\n",funcName);
+        return;//TODO: bad
+      }
+      return;//TODO: good
+    }
+
+    while(typesList->type && exprList) {
+      type1 = typesList->type;
+      
+      if (exprList-> left)
+        type2 = semantizeExpression(exprList->left,currentScope);
+      else 
+        break;
+      
+      if (checkNull(type1,exprList->left->token)&& strcmp(type1,type2) != 0) {
         printf("Function %s call not matching signature: Argument %d should be %s\n",
           funcName,countArgs,type1);
         return;
       }
       typesList = typesList->next;
       exprList = exprList->right;
+      countArgs++;
     }
 
     if (typesList->type || exprList) {
-      printf("FUCK YOU %d %d %d \n",countArgs,countArgs,countArgs);
+      printf("Function '%s' was called with %d arguments instead of %d\n",funcName, countArgs, neededLength);
     }
 
 
@@ -521,6 +644,7 @@
       semantizeCondition(tree->left, currentScope);
     }
     else if( strcmp(token, "condition") == 0) {
+      //TODO: Empty condition in for loop
       semantizeCondition(tree->left, currentScope);
     }
     else if( strcmp(token, "return") == 0) {
@@ -528,6 +652,9 @@
     }
     else if( strcmp(token, "=") == 0) { 
       semantizeAssignment(tree,currentScope);
+    }
+    else if (strcmp(token, "[]") == 0) {
+      semantizeIndex(tree,currentScope);
     }
     else if( isNotKeyword(token) && isIdent(token)) {
       semantizeIdentifier(tree,currentScope);
