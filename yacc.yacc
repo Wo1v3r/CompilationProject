@@ -3,14 +3,12 @@
   #include <string.h>
   #include <ctype.h>
   #include <regex.h>
-  #include "lex.yy.c"
   #include "semantics.c"
 
   void buildTree(node* tree);
-
   void semantizeTree(node* tree, scope* currentScope);
   void freeTree(node* tree);
-  
+  extern char* yytext;
   int yyerror(const char*);
   #define YYSTYPE struct node*
 
@@ -53,6 +51,7 @@ tree
 line
       : command
       | statement
+      | block_statement
 
 command
       : expr SEMICOLON
@@ -212,18 +211,18 @@ num
       : NUM         { $$ = makeNode(yytext,NULL,NULL); }  
 
 %%
-
+  #include "lex.yy.c"
   void buildTree(node* tree){
     printf("AST:\n\n");
 
     printTree(tree);
-    linkedList*  globalList = makeLink(NULL,NULL,NULL);
+    linkedList* globalList = makeLink(NULL,NULL,NULL);
     scope* globalScope= makeScope(globalList,NULL);
 
     printf("Semantics:\n\n");
     semantizeTree(tree, globalScope);
     mainExists();
-    printScope(globalScope);
+    // printScope(globalScope);
   }
 
   int main() {

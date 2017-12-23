@@ -1,6 +1,6 @@
   #include "print.c"
   int mainFlag = 0;
-
+  int errorLine = 0;
   int isChar(char* token);
   int isString(char* token);
   
@@ -295,8 +295,7 @@
     if (strcmp (token, "!") == 0) return "boolean ";
     if (strcmp (token, "abs") == 0) return "int | string ";
     if (strcmp (token, "pointer") == 0) return "intp | charp ";
-    if (strcmp (token, "reference") == 0) return "int | char "; // | string[]
-    // if (strcmp (token, "[]"))
+    if (strcmp (token, "reference") == 0) return "int | char ";
 
     return NULL;
   }
@@ -616,6 +615,13 @@
     linkedList* list;
     typesList* types;
     char *name,*type,*token = tree->token;
+    if (strcmp(token, "line") == 0) errorLine++;
+
+    if(strcmp(token,"block") == 0) {
+      linkedList* list = makeLink(NULL,NULL,NULL);
+      currentScope->right = makeScope(list,currentScope);
+      currentScope = currentScope->right;
+    }
 
     if (strcmp(token, "function def") == 0) {
       semantizeFunctionDef(tree,currentScope);
@@ -682,8 +688,8 @@
     }
 
     if(strcmp(token,"block") == 0) {
-      // currentScope = currentScope-> left;
-      // free(currentScope->right);
-      // currentScope->right = NULL;
+      currentScope = currentScope-> left;
+      free(currentScope->right);
+      currentScope->right = NULL;
     }
   }
