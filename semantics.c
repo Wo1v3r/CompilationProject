@@ -419,7 +419,7 @@
     type = typeOf(tree->token,currentScope);
 
     if (!type) type = "null";
-    
+
     return type;
   }
 
@@ -621,18 +621,18 @@
     char *name,*type,*token = tree->token;
     if (strcmp(token, "line") == 0) errorLine++;
 
-    if(strcmp(token,"block") == 0) {
-      linkedList* list = makeLink(NULL,NULL,NULL);
-      currentScope->right = makeScope(list,currentScope);
-      currentScope = currentScope->right;
-    }
 
-    if (strcmp(token, "function def") == 0) {
+    else if (strcmp(token, "function def") == 0) {
       semantizeFunctionDef(tree,currentScope);
       currentScope = currentScope->right;
       tree = tree->right->right->left;
     }
 
+    else if(strcmp(token,"block") == 0) {
+      linkedList* list = makeLink(NULL,NULL,NULL);
+      currentScope->right = makeScope(list,currentScope);
+      currentScope = currentScope->right;
+    }
     else if (strcmp(token, "function call") == 0) {
       semantizeFunctionCall(tree,currentScope);
     }
@@ -691,9 +691,9 @@
       semantizeTree( tree->right, currentScope);
     }
 
-    // if(strcmp(token,"block") == 0) {
-    //   currentScope = currentScope-> left;
-    //   free(currentScope->right);
-    //   currentScope->right = NULL;
-    // }
+    if(strcmp(token,"block") == 0 || strcmp(token,"function def") == 0) {
+      currentScope = currentScope-> left;
+      freeScope(currentScope->right);
+      currentScope->right = NULL;
+    }
   }

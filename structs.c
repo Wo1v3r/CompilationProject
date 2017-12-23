@@ -62,6 +62,30 @@
     return newScope;
   }
 
+  void freeTypes(typesList* types){
+    if (!types) return;
+
+    freeTypes(types->next);
+    free(types);
+  }
+
+  void freeList(linkedList* list){
+
+    if (!list) return;
+      
+
+    freeTypes(list->types);
+    freeList(list->next);
+
+    free(list);
+  }
+
+
+  void freeScope(scope* scope) {
+    freeList(scope->list);
+    free(scope);
+  }
+
   void freeTree(node* tree){
       if (tree != NULL) {
         freeTree(tree->right);

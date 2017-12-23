@@ -52,7 +52,7 @@ tree
 line
       : command
       | statement
-      | block_statement
+      | block_line
 
 command
       : expr SEMICOLON
@@ -70,6 +70,10 @@ statement
       | for_statement
       | function_statement
       | declaration_statement SEMICOLON
+
+block_line
+      : LEFTCURL RIGHTCURL { $$ = makeNode("block", NULL,NULL);}
+      | block_statement
 
 if_statement
       : IF wrapped_expr command_statement                         { $$ = makeNode("if", $2, makeNode("then, else", $3, NULL))  ;}
@@ -223,7 +227,7 @@ num
     printf("Semantics:\n\n");
     semantizeTree(tree, globalScope);
     mainExists();
-    printScope(globalScope);
+    // printScope(globalScope);
   }
 
   int main() {
