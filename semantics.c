@@ -692,8 +692,7 @@
     }
 
     if(strcmp(token,"block") == 0 || strcmp(token,"function def") == 0) {
-      currentScope = currentScope-> left;
-      freeScope(currentScope->right);
-      currentScope->right = NULL;
+      freeScope(currentScope);
+      currentScope = NULL;
     }
   }

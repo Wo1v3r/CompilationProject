@@ -45,6 +45,7 @@
 
     newLink -> name = token;
     newLink -> type = type;
+    newLink -> types = NULL;
     newLink -> next = NULL;
 
     return newLink;
@@ -74,9 +75,9 @@
     if (!list) return;
       
 
-    freeTypes(list->types);
     freeList(list->next);
 
+    freeTypes(list->types);
     free(list);
   }
 
