@@ -227,7 +227,6 @@ num
     printf("Semantics:\n\n");
     semantizeTree(tree, globalScope);
     mainExists();
-    // printScope(globalScope);
   }
 
   int main() {

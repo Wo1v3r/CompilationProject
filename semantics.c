@@ -345,7 +345,7 @@
     return 0;
   }
 
-  int semantizeFunctionDef(node* tree, scope* currentScope){
+  void semantizeFunctionDef(node* tree, scope* currentScope){
       char *name, *type;
       typesList* types = (typesList*)malloc(sizeof(typesList));
       linkedList* list = makeLink(NULL,NULL,NULL);
@@ -357,10 +357,6 @@
       name = tree->left->right->token;
 
       checkMain(name,types);
-
-
-      if (strcmp(type,"string") == 0) return 0;
-
       declaration(type,name,types,currentScope);
 
       currentScope->right = makeScope(list,currentScope);
@@ -369,8 +365,6 @@
       currentScope -> returnType = type;
 
       decl_list(tree->right->left,currentScope);
-
-      return 1;
   }
 
 
@@ -400,7 +394,6 @@
     if (isChar(tree->token)) return "char";
     
     if (strcmp(tree->token, "function call") == 0) {
-
       return typeOf(tree->left->token,currentScope);
     }
 
@@ -508,10 +501,17 @@
 
   void semantizeReturnType(node* tree, scope* currentScope){
     char* funcType = currentScope->returnType;
-    if (!funcType) {
+
+    if (!funcType){
+      printf("return statement must be in a function\n");
+      return;
+    }
+
+    if (strcmp(funcType, "string") == 0) {
       printf("Function cannot return a string\n");
       return;
     }
+
     char* returnType;
     if (strcmp(tree-> token," ") == 0)
       returnType = "void";
@@ -535,7 +535,7 @@
     else
       type = typeOf(tree->left->token,currentScope);
 
-    if (!type) return;
+    if (!type || !assignType) return;
 
     if (checkNull(type,tree->right->token) && strcmp(type,assignType) != 0) {
       printf("Error: %s was assigned to type of %s\n", assignType, type );
@@ -627,10 +627,9 @@
 
 
     else if (strcmp(token, "function def") == 0) {
-      if (semantizeFunctionDef(tree,currentScope)) {
-        currentScope = currentScope->right;
-        tree = tree->right->right->left;
-      }
+      semantizeFunctionDef(tree,currentScope);
+      currentScope = currentScope->right;
+      tree = tree->right->right->left;
     }
 
     else if(strcmp(token,"block") == 0) {
