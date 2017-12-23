@@ -382,7 +382,7 @@
     if (strcmp(actualType,"charp") == 0) return 0;
 
     printf("Error: null can be assigned only to intp | charp\n");
-    return 0; //TODO: Should exit here
+    return 0;
   }
 
   char* semantizeExpression(node* tree, scope* currentScope) {
@@ -415,7 +415,7 @@
     char* isBool = semantizeExpression(tree, currentScope);
 
     if (strcmp(isBool,"boolean") != 0) {
-      printf("Condition did not evalute to a boolean expression\n");
+      printf("Error: condition must be boolean expression\n");
     }
   }
 
@@ -433,12 +433,12 @@
       return;
     }
     if (strcmp(type1,type2) != 0) {
-      printf("\nError: <%s> %s <%s>\n",type1, tree->token, type2);
+      printf("Error: <%s> %s <%s>\n",type1, tree->token, type2);
       return;
     }
 
     if (strcmp(type,"equality") != 0 && strcmp(type1,type) != 0) {
-      printf("\nError: %s should be type %s\n", type1, type);
+      printf("Error: %s should be type %s\n", type1, type);
     }
   }
 
@@ -464,7 +464,7 @@
           strstr(types,type1),
           strlen(exactType)
        )) {
-      printf("\nError: %s should be type %s\n", type1, types);      
+      printf("Error: %s should be type %s\n", type1, types);      
     }
   }
 
@@ -483,7 +483,7 @@
     strcat(exactType," ");
 
     if (strcmp(type1,"int") != 0) { 
-      printf("%s must be used on type int\n", tree->token);
+      printf("Error: %s must be used on type int\n", tree->token);
       return;
     }
 
@@ -495,7 +495,7 @@
           strstr(types,type2),
           strlen(exactType)
        )) {
-      printf("\nError: %s should be type %s\n", type2, types);      
+      printf("Error: %s should be type %s\n", type2, types);      
     }
   }
 
@@ -503,12 +503,12 @@
     char* funcType = currentScope->returnType;
 
     if (!funcType){
-      printf("return statement must be in a function\n");
+      printf("Error: return statement must be in a function\n");
       return;
     }
 
     if (strcmp(funcType, "string") == 0) {
-      printf("Function cannot return a string\n");
+      printf("Error: function cannot return a string\n");
       return;
     }
 
@@ -519,7 +519,7 @@
       returnType= semantizeExpression(tree,currentScope);
 
     if (checkNull(funcType,tree->token) && strcmp(funcType,returnType) != 0) {
-      printf("Return type '%s' must match function return type '%s'\n", returnType, funcType );
+      printf("Error: return type '%s' must match function return type '%s'\n", returnType, funcType );
     }
 
   }
@@ -550,11 +550,11 @@
     type2 = semantizeExpression(tree->right, currentScope);
 
     if ( strcmp(type1, "string") != 0 ) {
-      printf("%s can not be accessed with an index\n", type1);
+      printf("Error: %s can not be accessed with an index\n", type1);
     }
 
     if ( strcmp(type2, "int") != 0 ) {
-      printf("Index can only be an integer\n");
+      printf("Error: Index can only be an integer\n");
     }
 
   }
@@ -569,7 +569,7 @@
     typesList* typesList = typesOf(funcName,currentScope);
 
     if (!typesList) {
-      printf("%s is not a function!\n", funcName);
+      printf("Error: %s is not a function!\n", funcName);
       return;
     }
 
@@ -579,10 +579,10 @@
 
     if (strcmp(typesList->type,"void") == 0 ){
       if (strcmp(exprList->token, " ") != 0 ) {
-        printf("Function %s should be called with no arguments\n",funcName);
-        return;//TODO: bad
+        printf("Error: Function %s should be called with no arguments\n",funcName);
+        return;
       }
-      return;//TODO: good
+      return;
     }
 
     while(typesList->type && exprList) {
@@ -594,7 +594,7 @@
         break;
       
       if (checkNull(type1,exprList->left->token)&& strcmp(type1,type2) != 0) {
-        printf("Function %s call not matching signature: Argument %d should be %s\n",
+        printf("Error: function %s call not matching signature: Argument %d should be %s\n",
           funcName,countArgs,type1);
         return;
       }
@@ -610,13 +610,13 @@
         exprList = exprList->right;
         if(exprList) countArgs++;
       }
-      printf("Function '%s' was called with %d arguments instead of %d\n",funcName, countArgs, neededLength);
+      printf("Error: function '%s' was called with %d arguments instead of %d\n",funcName, countArgs, neededLength);
     }
 
 
   }
   void mainExists() { 
-    if (!mainFlag) printf("Main function was not defined\n");
+    if (!mainFlag) printf("Error: main function was not defined\n");
   }
 
   void semantizeTree(node* tree, scope* currentScope) {
@@ -671,7 +671,6 @@
       semantizeCondition(tree->left, currentScope);
     }
     else if( strcmp(token, "condition") == 0) {
-      //TODO: Empty condition in for loop
       semantizeCondition(tree->left, currentScope);
     }
     else if( strcmp(token, "return") == 0) {
