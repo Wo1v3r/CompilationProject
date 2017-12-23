@@ -69,10 +69,7 @@
     if (strcmp(token,"[]") == 0) return "char";
     if (strcmp(token,"null") == 0) return "null";
 
-    if (!scope) {
-        printf("Error: %s was used but not defined!\n", token);
-        return NULL;
-    }
+    if (!scope) return NULL;
     
     type = typeOfInScope(token,scope);
     if (type) return type;
@@ -327,7 +324,8 @@
   }
 
   void semantizeIdentifier(node* tree, scope* currentScope) {
-      typeOf(tree->token,currentScope);
+      if (!typeOf(tree->token,currentScope)) 
+        printf("Error: %s was used but not defined\n",tree->token);
   }
 
   int checkMain(char* token, typesList* types) {
