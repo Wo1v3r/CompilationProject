@@ -687,9 +687,9 @@
       semantizeTree( tree->right, currentScope);
     }
 
-    if(strcmp(token,"block") == 0) {
-      currentScope = currentScope-> left;
-      free(currentScope->right);
-      currentScope->right = NULL;
-    }
+    // if(strcmp(token,"block") == 0) {
+    //   currentScope = currentScope-> left;
+    //   free(currentScope->right);
+    //   currentScope->right = NULL;
+    // }
   }
