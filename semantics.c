@@ -67,9 +67,13 @@
     char* type;
 
     if (strcmp(token,"[]") == 0) return "char";
+    if (strcmp(token,"null") == 0) return "null";
 
-    if (!scope) return NULL;
-
+    if (!scope) {
+        printf("Error: %s was used but not defined!\n", token);
+        return NULL;
+    }
+    
     type = typeOfInScope(token,scope);
     if (type) return type;
 
@@ -313,6 +317,7 @@
   }
   
   void semantizeDeclaration(node* tree, scope* currentScope){
+
       char *type, *name;
 
       type = tree->left->token;
@@ -322,14 +327,7 @@
   }
 
   void semantizeIdentifier(node* tree, scope* currentScope) {
-      char* type = typeOf(tree->token,currentScope);
-
-      if (type){
-        printf("TypeOf %s: %s\n",tree->token,type);
-      }
-      else {
-        printf("Error: %s was used but not defined!\n", tree->token);
-      }
+      typeOf(tree->token,currentScope);
   }
 
   int checkMain(char* token, typesList* types) {
@@ -390,7 +388,7 @@
     if (strcmp(actualType,"intp") == 0) return 0;
     if (strcmp(actualType,"charp") == 0) return 0;
 
-    printf("Error: Null can be assigned only to intp | charp\n");
+    printf("Error: null can be assigned only to intp | charp\n");
     return 0; //TODO: Should exit here
   }
 
@@ -418,8 +416,6 @@
 
     type = typeOf(tree->token,currentScope);
 
-    if (!type) type = "null";
-
     return type;
   }
 
@@ -435,6 +431,7 @@
     char* type = sameTypes(tree->token);
     char* type1 = semantizeExpression(tree->left,currentScope);
     char* type2 = semantizeExpression(tree->right,currentScope);
+
 
     if (
         (isNull(tree->right->token) && isNull(tree->left->token)) ||
@@ -463,7 +460,6 @@
     strcat(exactType," ");
 
     if (!type1) { 
-      printf("\nError no type for %s\n", tree->token);
       return;
     }
 
@@ -484,17 +480,15 @@
     char* types = differentTypes(tree->token);
 
     char* type1 = semantizeExpression(tree->right,currentScope);
-    char* type2 = semantizeExpression(tree->left,currentScope);    
+    char* type2 = semantizeExpression(tree->left,currentScope);
 
-
+    if (!type1 || !type2) { 
+      return;
+    }
+    
     char* exactType = (char*) malloc(sizeof(type2) + 1 );
     strcpy(exactType,type2);
     strcat(exactType," ");
-
-    if (!type1 || !type2) { 
-      printf("\nError no type for %s\n", tree->token);
-      return;
-    }
 
     if (strcmp(type1,"int") != 0) { 
       printf("%s must be used on type int\n", tree->token);
@@ -538,6 +532,7 @@
     else
       type = typeOf(tree->left->token,currentScope);
 
+    if (!type) return;
 
     if (checkNull(type,tree->right->token) && strcmp(type,assignType) != 0) {
       printf("Error: %s was assigned to type of %s\n", assignType, type );
