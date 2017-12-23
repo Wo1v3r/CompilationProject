@@ -404,7 +404,7 @@
 
     
     if (strcmp(tree->token, "function call") == 0)
-      return typeOf(tree->left->token,currentScope);
+      type = typeOf(tree->left->token,currentScope);
 
     if (strcmp(tree->token, "reference") == 0){
       type = typeOf(tree->left->token,currentScope);
@@ -416,7 +416,11 @@
       return referenceOf(type);
     }
 
-    return typeOf(tree->token,currentScope);
+    type = typeOf(tree->token,currentScope);
+
+    if (!type) type = "null";
+    
+    return type;
   }
 
   void semantizeCondition(node* tree, scope* currentScope) {
