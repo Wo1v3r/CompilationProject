@@ -1,14 +1,17 @@
-int test(int a){
-    string flag = true;
+int main(){
+    int a;
+    boolean flag = true;
     int grade;
-    if(!testOk()){
-        for(a=0;a<100 && flag;a=rand())
+
+    if(flag){
+        for( a=0 ; a<100 && flag; a=grade )
             grade = a;
             if(grade >= 90){
                 flag = false;
             }
     }
-    else
-        grade = 100;
+    else grade = 100;
     return grade;
 }
+
+main();

@@ -48,7 +48,7 @@
     }
   }
 
-  char* searchList (char* token, linkedList* list) {
+  char* searchList (char* token, linkedList* list) {    
     if (!list) return NULL;
 
     if (list->name && strcmp(token,list->name) == 0) {
@@ -59,6 +59,7 @@
   }
 
   char* typeOfInScope(char* token, scope* scope) {
+
     if (!scope) return NULL;
     return searchList(token,scope->list);
   }
@@ -72,6 +73,7 @@
     if (!scope) return NULL;
     
     type = typeOfInScope(token,scope);
+
     if (type) return type;
 
     return typeOf(token,scope->left);
@@ -89,10 +91,9 @@
   }
 
   int typesListLength(typesList* list) {
-    if (list) {
-      return 1 + typesListLength(list->next);
-    }
-    return 0;
+    if (!list->next) return 0;
+    
+    return 1 + typesListLength(list->next);
   }
 
   typesList* typesOfInScope(char* token, scope* scope) {
@@ -344,7 +345,7 @@
     return 0;
   }
 
-  void semantizeFunctionDef(node* tree, scope* currentScope){
+  int semantizeFunctionDef(node* tree, scope* currentScope){
       char *name, *type;
       typesList* types = (typesList*)malloc(sizeof(typesList));
       linkedList* list = makeLink(NULL,NULL,NULL);
@@ -357,10 +358,8 @@
 
       checkMain(name,types);
 
-      if (strcmp(type,"string") == 0) {
-        printf("Function %s can not return a string\n", name);
-        return;
-      }
+
+      if (strcmp(type,"string") == 0) return 0;
 
       declaration(type,name,types,currentScope);
 
@@ -370,6 +369,8 @@
       currentScope -> returnType = type;
 
       decl_list(tree->right->left,currentScope);
+
+      return 1;
   }
 
 
@@ -397,10 +398,11 @@
     if (isInt(tree->token)) return "int";
     if (isString(tree->token)) return "string";
     if (isChar(tree->token)) return "char";
-
     
-    if (strcmp(tree->token, "function call") == 0)
-      type = typeOf(tree->left->token,currentScope);
+    if (strcmp(tree->token, "function call") == 0) {
+
+      return typeOf(tree->left->token,currentScope);
+    }
 
     if (strcmp(tree->token, "reference") == 0){
       type = typeOf(tree->left->token,currentScope);
@@ -412,9 +414,8 @@
       return referenceOf(type);
     }
 
-    type = typeOf(tree->token,currentScope);
+    return typeOf(tree->token,currentScope);
 
-    return type;
   }
 
   void semantizeCondition(node* tree, scope* currentScope) {
@@ -507,6 +508,10 @@
 
   void semantizeReturnType(node* tree, scope* currentScope){
     char* funcType = currentScope->returnType;
+    if (!funcType) {
+      printf("Function cannot return a string\n");
+      return;
+    }
     char* returnType;
     if (strcmp(tree-> token," ") == 0)
       returnType = "void";
@@ -519,7 +524,7 @@
 
   }
 
-  void semantizeAssignment(node* tree, scope* currentScope) {
+  void semantizeAssignment(node* tree, scope* currentScope) {    
     char* type;
     char* assignType = semantizeExpression(tree->right,currentScope);
 
@@ -598,7 +603,13 @@
       countArgs++;
     }
 
+
+
     if (typesList->type || exprList) {
+      while(exprList){
+        exprList = exprList->right;
+        if(exprList) countArgs++;
+      }
       printf("Function '%s' was called with %d arguments instead of %d\n",funcName, countArgs, neededLength);
     }
 
@@ -616,9 +627,10 @@
 
 
     else if (strcmp(token, "function def") == 0) {
-      semantizeFunctionDef(tree,currentScope);
-      currentScope = currentScope->right;
-      tree = tree->right->right->left;
+      if (semantizeFunctionDef(tree,currentScope)) {
+        currentScope = currentScope->right;
+        tree = tree->right->right->left;
+      }
     }
 
     else if(strcmp(token,"block") == 0) {
