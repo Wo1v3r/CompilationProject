@@ -432,7 +432,7 @@
         ){ 
       return;
     }
-    if (strcmp(type1,type2) != 0) {
+    if (type1 && type2 && strcmp(type1,type2) != 0) {
       printf("Error: <%s> %s <%s>\n",type1, tree->token, type2);
       return;
     }
@@ -518,6 +518,7 @@
     else
       returnType= semantizeExpression(tree,currentScope);
 
+    if (returnType == NULL) return;
     if (checkNull(funcType,tree->token) && strcmp(funcType,returnType) != 0) {
       printf("Error: return type '%s' must match function return type '%s'\n", returnType, funcType );
     }
