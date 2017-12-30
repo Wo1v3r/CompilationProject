@@ -1,6 +1,6 @@
   #include "print.c"
   int mainFlag = 0;
-  int errorLine = 0;
+  int error = 0;
   int isChar(char* token);
   int isString(char* token);
   
@@ -117,6 +117,7 @@
 
     if (typeOfInScope(name,currentScope)) {
       printf("ERROR: %s was already defined in this scope!\n", name);
+      error++;
       return;
     }
 
@@ -325,8 +326,10 @@
   }
 
   void semantizeIdentifier(node* tree, scope* currentScope) {
-      if (!typeOf(tree->token,currentScope)) 
+      if (!typeOf(tree->token,currentScope)) {
         printf("Error: %s was used but not defined\n",tree->token);
+        error++;
+      }
   }
 
   int checkMain(char* token, typesList* types) {
@@ -382,6 +385,7 @@
     if (strcmp(actualType,"charp") == 0) return 0;
 
     printf("Error: null can be assigned only to intp | charp\n");
+    error++;
     return 0;
   }
 
@@ -416,6 +420,7 @@
 
     if (strcmp(isBool,"boolean") != 0) {
       printf("Error: condition must be boolean expression\n");
+      error++;
     }
   }
 
@@ -434,11 +439,13 @@
     }
     if (strcmp(type1,type2) != 0) {
       printf("Error: <%s> %s <%s>\n",type1, tree->token, type2);
+      error++;
       return;
     }
 
     if (strcmp(type,"equality") != 0 && strcmp(type1,type) != 0) {
       printf("Error: %s should be type %s\n", type1, type);
+      error++;
     }
   }
 
@@ -464,7 +471,8 @@
           strstr(types,type1),
           strlen(exactType)
        )) {
-      printf("Error: %s should be type %s\n", type1, types);      
+      printf("Error: %s should be type %s\n", type1, types);   
+      error++;   
     }
   }
 
@@ -484,6 +492,7 @@
 
     if (strcmp(type1,"int") != 0) { 
       printf("Error: %s must be used on type int\n", tree->token);
+      error++;
       return;
     }
 
@@ -495,7 +504,8 @@
           strstr(types,type2),
           strlen(exactType)
        )) {
-      printf("Error: %s should be type %s\n", type2, types);      
+      printf("Error: %s should be type %s\n", type2, types);
+      error++;  
     }
   }
 
@@ -504,11 +514,13 @@
 
     if (!funcType){
       printf("Error: return statement must be in a function\n");
+      error++;
       return;
     }
 
     if (strcmp(funcType, "string") == 0) {
       printf("Error: function cannot return a string\n");
+      error++;
       return;
     }
 
@@ -520,6 +532,7 @@
 
     if (checkNull(funcType,tree->token) && strcmp(funcType,returnType) != 0) {
       printf("Error: return type '%s' must match function return type '%s'\n", returnType, funcType );
+      error++;
     }
 
   }
@@ -539,6 +552,7 @@
 
     if (checkNull(type,tree->right->token) && strcmp(type,assignType) != 0) {
       printf("Error: %s was assigned to type of %s\n", assignType, type );
+      error++;
     }
   }
 
@@ -551,10 +565,12 @@
 
     if ( strcmp(type1, "string") != 0 ) {
       printf("Error: %s can not be accessed with an index\n", type1);
+      error++;
     }
 
     if ( strcmp(type2, "int") != 0 ) {
       printf("Error: Index can only be an integer\n");
+      error++;
     }
 
   }
@@ -570,6 +586,7 @@
 
     if (!typesList) {
       printf("Error: %s is not a function!\n", funcName);
+      error++;
       return;
     }
 
@@ -580,6 +597,7 @@
     if (strcmp(typesList->type,"void") == 0 ){
       if (strcmp(exprList->token, " ") != 0 ) {
         printf("Error: Function %s should be called with no arguments\n",funcName);
+        error++;
         return;
       }
       return;
@@ -596,6 +614,7 @@
       if (checkNull(type1,exprList->left->token)&& strcmp(type1,type2) != 0) {
         printf("Error: function %s call not matching signature: Argument %d should be %s\n",
           funcName,countArgs,type1);
+        error++;
         return;
       }
       typesList = typesList->next;
@@ -611,22 +630,25 @@
         if(exprList) countArgs++;
       }
       printf("Error: function '%s' was called with %d arguments instead of %d\n",funcName, countArgs, neededLength);
+      error++;
     }
 
 
   }
   void mainExists() { 
-    if (!mainFlag) printf("Error: main function was not defined\n");
+    if (!mainFlag) { 
+      printf("Error: main function was not defined\n");
+      error++;
+    }
   }
 
   void semantizeTree(node* tree, scope* currentScope) {
     linkedList* list;
     typesList* types;
     char *name,*type,*token = tree->token;
-    if (strcmp(token, "line") == 0) errorLine++;
 
 
-    else if (strcmp(token, "function def") == 0) {
+    if (strcmp(token, "function def") == 0) {
       semantizeFunctionDef(tree,currentScope);
       currentScope = currentScope->right;
       tree = tree->right->right->left;
@@ -687,10 +709,12 @@
     }
 
     if ( tree->left ) {
+      printf("HERE1 %s\n",tree->left->token);
       semantizeTree( tree->left , currentScope);
     }
 
     if ( tree->right ) {
+      printf("HERE2 %s\n",tree->right->token);
       semantizeTree( tree->right, currentScope);
     }
 
