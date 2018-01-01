@@ -167,6 +167,7 @@ expr
 
       | ident ASSIGN expr       { $$ = makeNode("=", $1, $3); }
       | memory ASSIGN expr      { $$ = makeNode("=", $1, $3); }  
+      | point ASSIGN expr      { $$ = makeNode("=", $1, $3); } 
       | memory
 
 
@@ -178,12 +179,14 @@ expr
 
       | REFERENCE ident         { $$ = makeNode("reference", $2, NULL); }
       | REFERENCE memory        { $$ = makeNode("reference", $2, NULL); }
-      | POINTER ident           { $$ = makeNode("pointer", $2, NULL); }
+      | point
       | function_call
 
       | ident                   
       | num
 
+point
+      : POINTER ident           { $$ = makeNode("pointer", $2, NULL); }
 decl
       : type variable              { $$ = makeNode("declaration", $1, $2); }
 
