@@ -65,6 +65,7 @@
   }
 
   char* typeOf(char* token, scope* scope) {
+
     char* type;
 
     if (strcmp(token,"[]") == 0) return "char";
@@ -129,11 +130,14 @@
   }
 
   void decl_list(node* tree, scope* currentScope) {
+
+
     char *type, *name;
     if (!tree || !tree ->left) return;
 
     type = tree->left->left->token;
     name = tree->left->right->token;
+
 
     declaration(type,name,NULL,currentScope);
     decl_list(tree->right, currentScope);
@@ -144,6 +148,11 @@
       if (!identList) return;
 
       name = identList->left->token;
+
+      if (strcmp(name, "array") == 0 ) {
+        name = identList->left->left->token;
+      }
+
       identList = identList->right;
 
       declaration(type,name,NULL,currentScope);
@@ -360,11 +369,8 @@
       declaration(type,name,types,currentScope);
 
       currentScope->right = makeScope(list,currentScope);
-      currentScope = currentScope->right;
-
-      currentScope -> returnType = type;
-
-      decl_list(tree->right->left,currentScope);
+      currentScope->right-> returnType = type;
+      decl_list(tree->right->left,currentScope->right);
   }
 
 
@@ -500,7 +506,7 @@
   }
 
   void semantizeReturnType(node* tree, scope* currentScope){
-    char* funcType = currentScope->returnType;
+    char* funcType = currentScope->left->returnType;
 
     if (!funcType){
       printf("Error: return statement must be in a function\n");
@@ -586,6 +592,7 @@
       return;
     }
 
+
     while(typesList->type && exprList) {
       type1 = typesList->type;
       
@@ -593,8 +600,13 @@
         type2 = semantizeExpression(exprList->left,currentScope);
       else 
         break;
-      
-      if (checkNull(type1,exprList->left->token)&& strcmp(type1,type2) != 0) {
+
+      if (!type2) {
+        printf("Error: %s was used but not defined\n", exprList->left->token);
+        exit(1);
+      }
+
+      if (checkNull(type1,exprList->left->token) && strcmp(type1,type2) != 0) {
         printf("Error: function %s call not matching signature: Argument %d should be %s\n",
           funcName,countArgs,type1);
         return;
@@ -614,7 +626,6 @@
       printf("Error: function '%s' was called with %d arguments instead of %d\n",funcName, countArgs, neededLength);
     }
 
-
   }
   void mainExists() { 
     if (!mainFlag) printf("Error: main function was not defined\n");
@@ -630,7 +641,8 @@
     else if (strcmp(token, "function def") == 0) {
       semantizeFunctionDef(tree,currentScope);
       currentScope = currentScope->right;
-      tree = tree->right->right->left;
+      semantizeTree(tree->right->right,currentScope);
+      return;
     }
 
     else if(strcmp(token,"block") == 0) {
@@ -695,8 +707,8 @@
       semantizeTree( tree->right, currentScope);
     }
 
-    if(strcmp(token,"block") == 0 || strcmp(token,"function def") == 0) {
-      freeScope(currentScope);
-      currentScope = NULL;
-    }
+    // if(strcmp(token,"block") == 0 || strcmp(token,"function def") == 0) {
+    //   freeScope(currentScope);
+    //   currentScope = NULL;
+    // }
   }

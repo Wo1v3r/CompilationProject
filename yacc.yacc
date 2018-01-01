@@ -43,7 +43,7 @@
 %%
 
 program
-      : tree { printf("Program\n=======\n\n"); buildTree($1); freeTree($1); }
+      : tree { printf("Program\n=======\n\n"); buildTree($1); }
 
 tree
       : line tree {  $$ = makeNode("line", $1 , $2);   }
@@ -229,6 +229,7 @@ num
 
     printf("Semantics:\n\n");
     semantizeTree(tree, globalScope);
+
     mainExists();
   }
 
