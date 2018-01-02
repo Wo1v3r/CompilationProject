@@ -30,7 +30,7 @@
 
     static int tabCount = 0;
     char* token = tree->token;
-
+    
     if ( shouldTab(token) ) {
       printf("%s\n", token);
       tab(++tabCount);

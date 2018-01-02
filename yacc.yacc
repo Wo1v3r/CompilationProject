@@ -4,7 +4,7 @@
   #include <string.h>
   #include <ctype.h>
   #include <regex.h>
-  #include "semantics.c"
+  #include "generator.c"
 
   void buildTree(node* tree);
   void semantizeTree(node* tree, scope* currentScope);
@@ -226,15 +226,19 @@ num
   // #include "lex.yy.c"
   void buildTree(node* tree){
     printf("AST:\n\n");
-
     printTree(tree);
-    linkedList* globalList = makeLink(NULL,NULL,NULL);
-    scope* globalScope= makeScope(globalList,NULL);
+
 
     printf("Semantics:\n\n");
+    linkedList* globalList = makeLink(NULL,NULL,NULL);
+    scope* globalScope= makeScope(globalList,NULL);
     semantizeTree(tree, globalScope);
-
     mainExists();
+
+
+    printf("3AC:\n\n");
+    addLabels(tree);
+    printTreeWithLabels(tree);
   }
 
   int main() {

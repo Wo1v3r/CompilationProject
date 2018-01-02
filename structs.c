@@ -5,7 +5,9 @@
     char* token;
     struct node* left;
     struct node* right;
-    char* label;
+    char* trueLabel;
+    char* falseLabel;
+    char* nextLabel;
   } node;
 
   typedef struct typesList {
@@ -38,7 +40,9 @@
     newNode -> left = left;
     newNode -> right = right;
     newNode -> token = newStr;
-    newNode -> label = NULL;
+    newNode -> trueLabel = NULL;
+    newNode -> falseLabel = NULL;
+    newNode -> nextLabel = NULL;
     return newNode;
   }
 
