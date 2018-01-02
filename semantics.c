@@ -1,6 +1,5 @@
   #include "print.c"
   int mainFlag = 0;
-  int errorLine = 0;
   int isChar(char* token);
   int isString(char* token);
   
@@ -180,6 +179,7 @@
     types-> type = type;
     types -> next = (typesList*)malloc(sizeof(typesList));
     types -> next -> type = NULL;
+    types -> next -> next = NULL;
 
     return getTypes(tree->right, types -> next);
   }
@@ -635,10 +635,8 @@
     linkedList* list;
     typesList* types;
     char *name,*type,*token = tree->token;
-    if (strcmp(token, "line") == 0) errorLine++;
 
-
-    else if (strcmp(token, "function def") == 0) {
+    if (strcmp(token, "function def") == 0) {
       semantizeFunctionDef(tree,currentScope);
       currentScope = currentScope->right;
       semantizeTree(tree->right->right,currentScope);
