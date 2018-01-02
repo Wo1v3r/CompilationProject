@@ -1,5 +1,5 @@
 %{
-  //#include "lex.yy.c"
+  #include "lex.yy.c"
   #include <stdio.h>
   #include <string.h>
   #include <ctype.h>
@@ -9,7 +9,7 @@
   void buildTree(node* tree);
   void semantizeTree(node* tree, scope* currentScope);
   void freeTree(node* tree);
-  extern char* yytext;
+  // extern char* yytext;
   int yyerror(const char*);
   #define YYSTYPE struct node*
 
@@ -167,7 +167,9 @@ expr
 
       | ident ASSIGN expr       { $$ = makeNode("=", $1, $3); }
       | memory ASSIGN expr      { $$ = makeNode("=", $1, $3); }  
-      | point ASSIGN expr      { $$ = makeNode("=", $1, $3); } 
+      | point ASSIGN expr       { $$ = makeNode("=", $1, $3); } 
+      | refer ASSIGN expr   { $$ = makeNode("=", $1, $3); } 
+      
       | memory
 
 
@@ -177,14 +179,16 @@ expr
       | B_FALSE                 { $$ = makeNode(yytext,NULL,NULL); }
       | B_TRUE                  { $$ = makeNode(yytext,NULL,NULL); }
 
-      | REFERENCE ident         { $$ = makeNode("reference", $2, NULL); }
       | REFERENCE memory        { $$ = makeNode("reference", $2, NULL); }
       | point
+      | refer
       | function_call
 
       | ident                   
       | num
 
+refer
+      : REFERENCE ident { $$ = makeNode("reference", $2, NULL); }
 point
       : POINTER ident           { $$ = makeNode("pointer", $2, NULL); }
 decl
@@ -219,7 +223,7 @@ num
       : NUM         { $$ = makeNode(yytext,NULL,NULL); }  
 
 %%
-  #include "lex.yy.c"
+  // #include "lex.yy.c"
   void buildTree(node* tree){
     printf("AST:\n\n");
 
