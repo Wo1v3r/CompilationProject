@@ -705,8 +705,8 @@
       semantizeTree( tree->right, currentScope);
     }
 
-    // if(strcmp(token,"block") == 0 || strcmp(token,"function def") == 0) {
-    //   freeScope(currentScope);
-    //   currentScope = NULL;
-    // }
+    if(strcmp(token,"block") == 0 || strcmp(token,"function def") == 0) {
+      freeScope(currentScope);
+      currentScope = NULL;
+    }
   }
