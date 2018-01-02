@@ -91,9 +91,14 @@
   }
 
   int typesListLength(typesList* list) {
-    if (!list->next) return 0;
-    
-    return 1 + typesListLength(list->next);
+    int count = 0;
+
+    while(list){
+      list = list->next;
+      count++;
+    }
+
+    return count;
   }
 
   typesList* typesOfInScope(char* token, scope* scope) {
@@ -357,6 +362,8 @@
   void semantizeFunctionDef(node* tree, scope* currentScope){
       char *name, *type;
       typesList* types = (typesList*)malloc(sizeof(typesList));
+      types->next = NULL;
+      types->type = NULL;
       linkedList* list = makeLink(NULL,NULL,NULL);
 
       if (! isVoid(tree->right->left,types) )
@@ -633,7 +640,6 @@
 
   void semantizeTree(node* tree, scope* currentScope) {
     linkedList* list;
-    typesList* types;
     char *name,*type,*token = tree->token;
 
     if (strcmp(token, "function def") == 0) {
