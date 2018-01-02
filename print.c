@@ -9,11 +9,11 @@
   }
 
   int shouldTab(char* token) {
-    int length = 4;
+    int length = 3;
 
     char* keywords[] = {
       "line",
-      "then, else",
+      //"then, else",
       "inner",
       "settings"
     };
@@ -33,6 +33,8 @@
 
     if ( shouldTab(token) ) {
       printf("%s\n", token);
+      if(tree->label != NULL)
+        printf("%s: ",tree->label);
       tab(++tabCount);
     }
 

@@ -5,6 +5,7 @@
     char* token;
     struct node* left;
     struct node* right;
+    char* label;
   } node;
 
   typedef struct typesList {
@@ -37,6 +38,7 @@
     newNode -> left = left;
     newNode -> right = right;
     newNode -> token = newStr;
+    newNode -> label = NULL;
     return newNode;
   }
 
@@ -91,6 +93,7 @@
       if (tree != NULL) {
         freeTree(tree->right);
         free(tree->token);
+        if(tree->label != NULL) free(tree->label);
         freeTree(tree->left);
         free(tree);
     }

@@ -1,5 +1,5 @@
 %{
-  #include "lex.yy.c"
+  //#include "lex.yy.c"
   #include <stdio.h>
   #include <string.h>
   #include <ctype.h>
@@ -9,7 +9,8 @@
   void buildTree(node* tree);
   void semantizeTree(node* tree, scope* currentScope);
   void freeTree(node* tree);
-  // extern char* yytext;
+  void createLabel(node* node);
+  extern char* yytext;
   int yyerror(const char*);
   #define YYSTYPE struct node*
 
@@ -76,13 +77,13 @@ block_line
       | block_statement
 
 if_statement
-      : IF wrapped_expr command_statement                         { $$ = makeNode("if", $2, makeNode("then, else", $3, NULL))  ;}
-      | IF wrapped_expr command_statement ELSE command_statement  { $$ = makeNode("if", $2, makeNode("then, else", $3, $5) )   ;}
-      | IF wrapped_expr command_statement ELSE if_statement       { $$ = makeNode("if", $2, makeNode("then, else", $3, $5) )   ;}
+      : IF wrapped_expr command_statement                         { $$ = makeNode("if", $2, makeNode("then, else", $3, NULL)); createLabel($$->right);}
+      | IF wrapped_expr command_statement ELSE command_statement  { $$ = makeNode("if", $2, makeNode("then, else", $3, $5) );  createLabel($$->right->right);}
+      | IF wrapped_expr command_statement ELSE if_statement       { $$ = makeNode("if", $2, makeNode("then, else", $3, $5) );  createLabel($$->right->right);}
 
 command_statement
       : block_statement
-      | command
+      | command        
 
 while_statement
       : WHILE wrapped_expr command_statement { $$ = makeNode("while", $2, $3) ;}
@@ -223,7 +224,7 @@ num
       : NUM         { $$ = makeNode(yytext,NULL,NULL); }  
 
 %%
-  // #include "lex.yy.c"
+  #include "lex.yy.c"
   void buildTree(node* tree){
     printf("AST:\n\n");
 
@@ -235,6 +236,16 @@ num
     semantizeTree(tree, globalScope);
 
     mainExists();
+    if(error > 0) printf("Semantics error/s found!\n");
+  }
+  void createLabel(node* node){
+        printf("TOKEN: %s\n",node->token);
+        char num[400];
+        sprintf(num, "%d", linenum);
+        char* label = (char*)malloc(2+strlen(num));
+        strcpy(label, "L");
+        strcat(label, num);
+        node -> label = label;
   }
 
   int main() {
