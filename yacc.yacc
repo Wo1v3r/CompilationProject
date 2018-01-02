@@ -44,7 +44,7 @@
 %%
 
 program
-      : tree { printf("Program\n=======\n\n"); buildTree($1); freeTree($1); }
+      : tree { printf("Program\n=======\n\n"); buildTree($1); freeTree($1);}
 
 tree
       : line tree {  $$ = makeNode("line", $1 , $2);   }
@@ -168,6 +168,9 @@ expr
 
       | ident ASSIGN expr       { $$ = makeNode("=", $1, $3); }
       | memory ASSIGN expr      { $$ = makeNode("=", $1, $3); }  
+      | point ASSIGN expr       { $$ = makeNode("=", $1, $3); } 
+      | refer ASSIGN expr   { $$ = makeNode("=", $1, $3); } 
+      
       | memory
 
 
@@ -177,14 +180,18 @@ expr
       | B_FALSE                 { $$ = makeNode(yytext,NULL,NULL); }
       | B_TRUE                  { $$ = makeNode(yytext,NULL,NULL); }
 
-      | REFERENCE ident         { $$ = makeNode("reference", $2, NULL); }
       | REFERENCE memory        { $$ = makeNode("reference", $2, NULL); }
-      | POINTER ident           { $$ = makeNode("pointer", $2, NULL); }
+      | point
+      | refer
       | function_call
 
       | ident                   
       | num
 
+refer
+      : REFERENCE ident { $$ = makeNode("reference", $2, NULL); }
+point
+      : POINTER ident           { $$ = makeNode("pointer", $2, NULL); }
 decl
       : type variable              { $$ = makeNode("declaration", $1, $2); }
 
@@ -227,6 +234,7 @@ num
 
     printf("Semantics:\n\n");
     semantizeTree(tree, globalScope);
+
     mainExists();
     if(error > 0) printf("Semantics error/s found!\n");
   }
