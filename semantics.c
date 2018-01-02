@@ -93,7 +93,7 @@
   int typesListLength(typesList* list) {
     int count = 0;
 
-    while(list){
+    while(list->next){
       list = list->next;
       count++;
     }
@@ -628,7 +628,7 @@
     if (typesList->type || exprList) {
       while(exprList){
         exprList = exprList->right;
-        if(exprList) countArgs++;
+        countArgs++;
       }
       printf("Error: function '%s' was called with %d arguments instead of %d\n",funcName, countArgs, neededLength);
     }
