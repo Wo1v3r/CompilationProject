@@ -8,14 +8,14 @@
 %%
 "//".*                ;
 
-"*"        return MULT; //
-"+"        return PLUS; //
-"-"        return MINUS; // 
-"/"        return DIV; //
-"^"        return POINTER; //
+"*"        return MULT;//
+"+"        return PLUS;//
+"-"        return MINUS;// 
+"/"        return DIV;//
+"^"        return POINTER;//
 
 "&&"      return AND;
-"&"       return REFERENCE; //
+"&"       return REFERENCE;//
 "||"      return OR;
 "=="      return EQUALS;
 ">="      return GEQUALS;
