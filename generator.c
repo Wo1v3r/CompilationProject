@@ -1,4 +1,5 @@
 #include "semantics.c"
+void printTreeWithLabels(node* tree);
 
 char* createLabel(int lineNum){
     char num[400];
@@ -8,6 +9,16 @@ char* createLabel(int lineNum){
     strcat(label, num);
 
     return label;
+}
+
+char* appendToFunction(char* label, char* funcName){
+  char* newLabel = (char*)malloc(strlen(label)+strlen(funcName) + 2 );
+
+  strcpy(newLabel,funcName);
+  strcat(newLabel,"_");
+  strcat(newLabel,label);
+
+  return newLabel;
 }
 
 int labelCount = 0;
@@ -29,30 +40,44 @@ void stmtLabel(node* tree, node* thenNode, node* elseNode){
   tree->falseLabel = elseLabel;
 }
 
+void funcLabel(node* tree){
+  char* label = createLabel(labelCount++);
+  char* funcName = tree->left->right->token;
+
+  node* funcCode= tree->right->right;
+
+  funcCode->funcLabel = appendToFunction(label,funcName);
+}
 
 void addLabels(node* tree){
-  printTree(tree);
   if (strcmp(tree->token, "line") == 0) {
     char* freshLabel = createLabel(labelCount++);
     tree->nextLabel = freshLabel;
     if (tree->right)
       tree->right->trueLabel = freshLabel;
 
-    if (tree->left && strcmp(tree->left->token, "if") == 0) {
-      tree->left->nextLabel = tree->nextLabel;
-    }
-    else if (tree->left && strcmp(tree->left->token, "while") == 0) {
-      tree->left->nextLabel = tree->nextLabel;
-    }
-    else if (tree->left && strcmp(tree->left->token, "do while") == 0) {
-      tree->left->nextLabel = tree->nextLabel;
-    }
-    else if (tree->left && strcmp(tree->left->token, "for") == 0) {
-      tree->left->nextLabel = tree->nextLabel;
+    if (tree->left) {
+
+      if (strcmp(tree->left->token, "if") == 0) {
+        tree->left->nextLabel = tree->nextLabel;
+      }
+      else if (strcmp(tree->left->token, "while") == 0) {
+        tree->left->nextLabel = tree->nextLabel;
+      }
+      else if (strcmp(tree->left->token, "do while") == 0) {
+        tree->left->nextLabel = tree->nextLabel;
+      }
+      else if (strcmp(tree->left->token, "for") == 0) {
+        tree->left->nextLabel = tree->nextLabel;
+      }
+
     }
   }
 
-  if (strcmp(tree->token,"if") == 0) {
+  if (strcmp(tree->token, "function def") == 0) {
+    funcLabel(tree);
+  }
+  else if (strcmp(tree->token,"if") == 0) {
     node* thenNode = tree -> right -> left;
     node* elseNode = NULL;
     if(tree->right->right)
@@ -82,8 +107,10 @@ void addLabels(node* tree){
 void printTreeWithLabels(node* tree){
   char* token = tree->token;
 
+
   if (shouldTab(token)){
-    if(tree->trueLabel) printf("Labels: Next: %s True: %s False: %s\n",tree->nextLabel, tree->trueLabel,tree->falseLabel);
+    if(tree->funcLabel) printf("FuncLabel: %s\n", tree->funcLabel);
+    if(tree->trueLabel) printf("Labels: True: %s False: %s Next: %s\n", tree->trueLabel,tree->falseLabel, tree->nextLabel);
     printf("%s\n", token);
   }
 

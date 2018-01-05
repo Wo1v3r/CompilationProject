@@ -5,6 +5,8 @@
     char* token;
     struct node* left;
     struct node* right;
+
+    char* funcLabel;
     char* trueLabel;
     char* falseLabel;
     char* nextLabel;
@@ -40,6 +42,7 @@
     newNode -> left = left;
     newNode -> right = right;
     newNode -> token = newStr;
+    newNode-> funcLabel = NULL;
     newNode -> trueLabel = NULL;
     newNode -> falseLabel = NULL;
     newNode -> nextLabel = NULL;

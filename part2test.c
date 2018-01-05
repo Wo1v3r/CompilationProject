@@ -31,8 +31,8 @@ int func2(int i, int j, int k)
 	boolean x, j, n;
 	k = 'k';
 	i = l + l;
-	// i = j + 1;
-	// i = k + 1; 
+	i = j + 1;
+	i = k + 1; 
 	if ((k == '*') || (x != false) && (l+m < i)){
 		x = l < m;
 	}
