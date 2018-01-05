@@ -12,20 +12,20 @@
 "+"        return PLUS; //
 "-"        return MINUS; // 
 "/"        return DIV; //
-"^"        return POINTER;
+"^"        return POINTER; //
 
 "&&"      return AND;
-"&"       return REFERENCE;
+"&"       return REFERENCE; //
 "||"      return OR;
-"=="      return EQUALS;    
-">="      return GEQUALS;   
-"<="      return LEQUALS;   
-">"       return GREATER;   
-"<"       return LOWER;     
+"=="      return EQUALS;
+">="      return GEQUALS;
+"<="      return LEQUALS;
+">"       return GREATER;
+"<"       return LOWER;
 
-"!="      return NEQUALS;   
-"!"       return NOT;       
-"="       return ASSIGN;    
+"!="      return NEQUALS;
+"!"       return NOT;
+"="       return ASSIGN;
 
 "boolean" return BOOL;    
 "charp"   return CHARP;   

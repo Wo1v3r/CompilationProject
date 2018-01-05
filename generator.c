@@ -4,6 +4,7 @@
 char* generatedCode;
 int registerCount = 0;
 
+
 char* createRegister(){
     char num[100];
     sprintf(num, "%d", registerCount++);
@@ -12,6 +13,15 @@ char* createRegister(){
     strcat(reg, num);
 
     return reg;
+}
+
+char* addLineToCode(char* line) {
+  int size = strlen(generatedCode) + strlen(line) + 1;
+  generatedCode = (char*) realloc(generatedCode, size);
+
+  strcat(generatedCode, line);
+  free(line);
+  return generatedCode;
 }
 
 int isNumber(char* token) {
@@ -35,10 +45,10 @@ char* unarOP(char* token){
 }
 
 int isUNAR(char* token) {
-    int length = 3;
+    int length = 4;
 
     char* keywords[] = {
-      "pointer", "reference", "abs"
+      "pointer", "reference", "abs", "!"
     };
 
     for (int i = 0 ; i < length ; i++ ) {
@@ -81,12 +91,6 @@ char* createOP(char* op, char* currentReg, char* leftReg, char* rightReg){
   return opLine;
 }
 
-char* createMem(node* tree, char* currentReg, char* leftReg) {
-  char* index = tree->right->token;
-
-  return createOP("+", currentReg, leftReg, index);
-}
-
 char* createUNAR(char* op, char* currentReg, char* leftReg) {
   int len;
   op = unarOP(op);
@@ -103,6 +107,18 @@ char* createUNAR(char* op, char* currentReg, char* leftReg) {
   return line;
 }
 
+char* createMem(node* tree, char** currentReg, char* leftReg, char* rightReg) {
+  char* offsetLine = createOP("+", *currentReg, leftReg, rightReg);
+  addLineToCode(offsetLine);
+
+  char* newReg = createRegister();
+  char* line = createUNAR("pointer", newReg, *currentReg);
+
+  *currentReg = newReg;
+
+  return line;
+}
+
 char* createVarLine(char* ident, char* currentReg){
   int len = strlen(ident) + strlen(currentReg) + 5;
   char *line = (char*) malloc(len);
@@ -115,14 +131,6 @@ char* createVarLine(char* ident, char* currentReg){
   return line;
 }
 
-char* addLineToCode(char* line) {
-  int size = strlen(generatedCode) + strlen(line) + 1;
-  generatedCode = (char*) realloc(generatedCode, size);
-
-  strcat(generatedCode, line);
-  free(line);
-  return generatedCode;
-}
 
 
 int shouldSkip(char* token) {
@@ -183,18 +191,11 @@ char* generateTree(node* tree) {
       return currentReg;
     }
     else if (isMem(token)) {
-
-      // printf("%s\n", leftReg);
+      //TODO: SHOULD NOT SHOW IF NOT IN ASSIGNMENT
       currentReg = createRegister();
-      line = createMem(tree, currentReg, leftReg);
+      line = createMem(tree, &currentReg, leftReg, rightReg);
       addLineToCode(line);
     }
-    // else if (isMem(token)) {
-    //   currentReg = createRegister();
-    //   line = createMem(tree);
-    //   addLineToCode(line);
-    // }
-    //FIXME: free this shit
     return currentReg;
 }
 
