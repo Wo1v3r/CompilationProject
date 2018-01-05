@@ -2,7 +2,7 @@
 void printTreeWithLabels(node* tree);
 
 char* createLabel(int lineNum){
-    char num[400];
+    char num[6];
     sprintf(num, "%d", lineNum);
     char* label = (char*)malloc(2+strlen(num));
     strcpy(label, "L");

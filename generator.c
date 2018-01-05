@@ -6,7 +6,7 @@ int registerCount = 0;
 
 
 char* createRegister(){
-    char num[100];
+    char num[6];
     sprintf(num, "%d", registerCount++);
     char* reg = (char*)malloc(strlen(num) + 3);
     strcpy(reg, "_t");
