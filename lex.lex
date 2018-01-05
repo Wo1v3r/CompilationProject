@@ -8,10 +8,10 @@
 %%
 "//".*                ;
 
-"*"        return MULT;
-"+"        return PLUS;
-"-"        return MINUS;
-"/"        return DIV;
+"*"        return MULT; //
+"+"        return PLUS; //
+"-"        return MINUS; // 
+"/"        return DIV; //
 "^"        return POINTER;
 
 "&&"      return AND;

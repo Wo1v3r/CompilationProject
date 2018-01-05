@@ -2,6 +2,48 @@
 
 
 char* generatedCode;
+int registerCount = 0;
+
+char* createRegister(){
+    char num[100];
+    sprintf(num, "%d", registerCount++);
+    char* reg = (char*)malloc(strlen(num) + 3);
+    strcpy(reg, "_t");
+    strcat(reg, num);
+
+    return reg;
+}
+
+int isNumber(char* token) {
+    if (strcmp(token,"0") == 0) return 1;
+
+    if (atoi(token)) return 1;
+
+    return 0;
+}
+
+char* unarOP(char* token){
+  if (strcmp(token, "reference") == 0) return "&";
+  if (strcmp(token, "pointer") == 0) return "^";
+  
+  return token;
+}
+
+int isUNAR(char* token) {
+    int length = 3;
+
+    char* keywords[] = {
+      "pointer", "reference", "abs"
+    };
+
+    for (int i = 0 ; i < length ; i++ ) {
+      if (strcmp(token,keywords[i]) == 0) 
+        return 1;
+    }
+
+    return 0;
+}
+
 
 int isOP(char* token) {
     int length = 4;
@@ -18,18 +60,138 @@ int isOP(char* token) {
     return 0;
 }
 
-void generateCode(node* tree){
-  generatedCode = (char*) malloc(10);
-  generateTree(tree);
-}
-void generateTree(node* tree) {
-    char *token = tree->token;
+char* createOP(char* op, char* currentReg, char* leftReg, char* rightReg){
+  int len = strlen(currentReg) + strlen(leftReg) + strlen(op) + strlen(rightReg) + 8;
+  char* opLine = (char*)malloc(len);
 
+  strcpy(opLine,currentReg);
+  strcat(opLine, " = ");
+  strcat(opLine,leftReg);
+  strcat(opLine, " ");
+  strcat(opLine,op);
+  strcat(opLine, " ");
+  strcat(opLine,rightReg);
+  strcat(opLine, "\n");
+
+  return opLine;
+}
+
+char* createUNAR(char* op, char* currentReg, char* leftReg) {
+  int len;
+  op = unarOP(op);
+  len = strlen(currentReg) + strlen(leftReg) + strlen(op) + 5;
+  char* line = (char*)malloc(len);
+
+  strcpy(line, currentReg);
+  strcat(line," = ");
+  strcat(line, op);
+  strcat(line, " ");
+  strcat(line, leftReg);
+  strcat(line, "\n");
+
+  return line;
+}
+
+char* createVarLine(char* ident, char* currentReg){
+  int len = strlen(ident) + strlen(currentReg) + 5;
+  char *line = (char*) malloc(len);
+
+  strcpy(line, currentReg);
+  strcat(line, " = ");
+  strcat(line, ident);
+  strcat(line, "\n");
+
+  return line;
+}
+
+char* addLineToCode(char* line) {
+  int size = strlen(generatedCode) + strlen(line) + 1;
+  generatedCode = (char*) realloc(generatedCode, size);
+
+  strcat(generatedCode, line);
+  free(line);
+  return generatedCode;
+}
+
+
+int shouldSkip(char* token) {
+
+    int length = 1;
+
+    char* keywords[] = {
+        "decl list "
+    };
+
+    for (int i = 0 ; i < length ; i++ ) {
+      if (strcmp(token,keywords[i]) == 0) 
+        return 1;
+    }
+
+    return 0;
+}
+
+char* generateTree(node* tree) {
+    char *token = tree->token;
+    char *line = NULL;
+    char *currentReg = NULL, *leftReg = NULL, *rightReg = NULL;
+
+
+    if(shouldSkip(token)) {
+      //TODO://
+      return NULL;
+    }
+
+    if (isNumber(token)) { 
+      return token;
+    }
     if ( tree->left ) {
-      generateTree( tree->left);
+      leftReg = generateTree( tree->left);
     }
 
     if ( tree->right ) {
-      generateTree( tree->right);
+      rightReg = generateTree( tree->right);
     }
+
+    // if (rightReg) {
+    //   printf("rightReg: %s\n", rightReg);
+    // }
+
+    // if (leftReg) {
+    //   printf("leftReg: %s\n", leftReg);
+    // }
+
+    
+
+    if (isOP(token)) {
+      currentReg = createRegister();
+      line = createOP(token,currentReg, leftReg, rightReg);
+      addLineToCode(line);
+    }
+
+    else if (isUNAR(token)) {
+      currentReg = createRegister();
+      line = createUNAR(token,currentReg,leftReg);
+      addLineToCode(line);
+    }
+
+    else if (isNotKeyword(token) && isIdent(token)) {
+      currentReg = createRegister();
+      line = createVarLine(token, currentReg);
+      addLineToCode(line);
+
+      return currentReg;
+    }
+    //FIXME: free this shit
+    return currentReg;
+}
+
+
+//////////
+
+void generateCode(node* tree){
+  generatedCode = (char*) malloc(10);
+  generateTree(tree);
+
+  printf("%s\n", generatedCode);
+  free(generatedCode);
 }
