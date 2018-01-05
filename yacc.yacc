@@ -1,5 +1,5 @@
 %{
-  #include "lex.yy.c"
+  //#include "lex.yy.c"
   #include <stdio.h>
   #include <string.h>
   #include <ctype.h>
@@ -9,7 +9,7 @@
   void buildTree(node* tree);
   void semantizeTree(node* tree, scope* currentScope);
   void freeTree(node* tree);
-  // extern char* yytext;
+  extern char* yytext;
   int yyerror(const char*);
   #define YYSTYPE struct node*
 
@@ -223,7 +223,7 @@ num
       : NUM         { $$ = makeNode(yytext,NULL,NULL); }  
 
 %%
-  // #include "lex.yy.c"
+  #include "lex.yy.c"
   void buildTree(node* tree){
     printf("AST:\n\n");
     printTree(tree);

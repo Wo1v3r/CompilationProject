@@ -12,6 +12,24 @@ char* createLabel(int lineNum){
 
 int labelCount = 0;
 
+void stmtLabel(node* tree, node* thenNode, node* elseNode){
+
+  char* thenLabel = createLabel(labelCount++);
+  char* elseLabel = createLabel(labelCount++);
+
+  thenNode->trueLabel = thenLabel;
+  if (elseNode)
+    elseNode->trueLabel = elseLabel;
+
+  thenNode->nextLabel = tree->nextLabel;
+  if (elseNode)
+    elseNode->nextLabel = tree->nextLabel;
+  
+  tree->trueLabel = thenLabel;
+  tree->falseLabel = elseLabel;
+}
+
+
 void addLabels(node* tree){
   printTree(tree);
   if (strcmp(tree->token, "line") == 0) {
@@ -26,6 +44,12 @@ void addLabels(node* tree){
     else if (tree->left && strcmp(tree->left->token, "while") == 0) {
       tree->left->nextLabel = tree->nextLabel;
     }
+    else if (tree->left && strcmp(tree->left->token, "do while") == 0) {
+      tree->left->nextLabel = tree->nextLabel;
+    }
+    else if (tree->left && strcmp(tree->left->token, "for") == 0) {
+      tree->left->nextLabel = tree->nextLabel;
+    }
   }
 
   if (strcmp(tree->token,"if") == 0) {
@@ -33,36 +57,22 @@ void addLabels(node* tree){
     node* elseNode = NULL;
     if(tree->right->right)
       elseNode = tree -> right -> right;
-    
-    char* thenLabel = createLabel(labelCount++);
-    char* elseLabel = createLabel(labelCount++);
-
-    thenNode->trueLabel = thenLabel;
-    if (elseNode)
-      elseNode->trueLabel = elseLabel;
-
-    thenNode->nextLabel = tree->nextLabel;
-    if (elseNode)
-      elseNode->nextLabel = tree->nextLabel;
-    
-    tree->trueLabel = thenLabel;
-    tree->falseLabel = elseLabel;
+    stmtLabel(tree, thenNode, elseNode);
   }
   else if (strcmp(tree->token,"while") == 0) {
     node* cond = tree -> left;
     node* dostmt = tree -> right;
-
-    char* thenLabel = createLabel(labelCount++);
-    char* elseLabel = createLabel(labelCount++);
-
-    cond->trueLabel = thenLabel;
-    dostmt->trueLabel = elseLabel;
-
-    cond->nextLabel = tree->nextLabel;
-    dostmt->nextLabel = tree->nextLabel;
-
-    tree->trueLabel = thenLabel;
-    tree->falseLabel = elseLabel;
+    stmtLabel(tree, cond, dostmt);
+  }
+  else if (strcmp(tree->token,"do while") == 0) {
+    node* dostmt = tree -> left;
+    node* cond = tree -> right;
+    stmtLabel(tree, cond, dostmt);
+  }
+  else if (strcmp(tree->token,"for") == 0) {
+    node* cond = tree -> left -> right -> left;
+    node* dostmt = tree -> right;
+    stmtLabel(tree, cond, dostmt);
   }
 
   if (tree->left) addLabels(tree->left);
