@@ -225,20 +225,23 @@ num
 %%
   // #include "lex.yy.c"
   void buildTree(node* tree){
-    printf("AST:\n\n");
+    printf("\n\nAST:\n\n");
     printTree(tree);
 
 
-    printf("Semantics:\n\n");
+    printf("\n\nSemantics:\n\n");
     linkedList* globalList = makeLink(NULL,NULL,NULL);
     scope* globalScope= makeScope(globalList,NULL);
     semantizeTree(tree, globalScope);
     mainExists();
 
 
-    printf("3AC:\n\n");
+    printf("\n\nLabelizer:\n\n");
     addLabels(tree);
     printTreeWithLabels(tree);
+
+    printf("\n\nGenerator:\n\n");
+    generateCode(tree);
   }
 
   int main() {
