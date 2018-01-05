@@ -44,6 +44,10 @@ char* unarOP(char* token){
   return token;
 }
 
+int isAssignment(char* token) {
+  return strcmp(token, "=") == 0;
+}
+
 int isUNAR(char* token) {
     int length = 4;
 
@@ -89,6 +93,18 @@ char* createOP(char* op, char* currentReg, char* leftReg, char* rightReg){
   strcat(opLine, "\n");
 
   return opLine;
+}
+
+char* createAssign(char* currentReg, char* rightReg) {
+  int len = strlen(currentReg) + strlen(rightReg) + 5;
+  char* line = (char*)malloc(len);
+
+  strcpy(line, currentReg);
+  strcat(line, " = ");
+  strcat(line, rightReg);
+  strcat(line, "\n");
+
+  return line;
 }
 
 char* createUNAR(char* op, char* currentReg, char* leftReg) {
@@ -171,6 +187,11 @@ char* generateTree(node* tree) {
       rightReg = generateTree( tree->right);
     }
     
+    if (isAssignment(token)) {
+      currentReg = leftReg;
+      line = createAssign(currentReg, rightReg);
+      addLineToCode(line);
+    }
     if (isOP(token)) {
       currentReg = createRegister();
       line = createOP(token,currentReg, leftReg, rightReg);
