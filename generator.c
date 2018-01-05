@@ -22,6 +22,11 @@ int isNumber(char* token) {
     return 0;
 }
 
+
+int isMem(char* token) {
+  return (strcmp(token,"[]") == 0);
+}
+
 char* unarOP(char* token){
   if (strcmp(token, "reference") == 0) return "&";
   if (strcmp(token, "pointer") == 0) return "^";
@@ -74,6 +79,12 @@ char* createOP(char* op, char* currentReg, char* leftReg, char* rightReg){
   strcat(opLine, "\n");
 
   return opLine;
+}
+
+char* createMem(node* tree, char* currentReg, char* leftReg) {
+  char* index = tree->right->token;
+
+  return createOP("+", currentReg, leftReg, index);
 }
 
 char* createUNAR(char* op, char* currentReg, char* leftReg) {
@@ -151,17 +162,7 @@ char* generateTree(node* tree) {
     if ( tree->right ) {
       rightReg = generateTree( tree->right);
     }
-
-    // if (rightReg) {
-    //   printf("rightReg: %s\n", rightReg);
-    // }
-
-    // if (leftReg) {
-    //   printf("leftReg: %s\n", leftReg);
-    // }
-
     
-
     if (isOP(token)) {
       currentReg = createRegister();
       line = createOP(token,currentReg, leftReg, rightReg);
@@ -181,6 +182,18 @@ char* generateTree(node* tree) {
 
       return currentReg;
     }
+    else if (isMem(token)) {
+
+      // printf("%s\n", leftReg);
+      currentReg = createRegister();
+      line = createMem(tree, currentReg, leftReg);
+      addLineToCode(line);
+    }
+    // else if (isMem(token)) {
+    //   currentReg = createRegister();
+    //   line = createMem(tree);
+    //   addLineToCode(line);
+    // }
     //FIXME: free this shit
     return currentReg;
 }
