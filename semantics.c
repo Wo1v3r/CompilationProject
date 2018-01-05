@@ -460,13 +460,13 @@
     char* type1 = semantizeExpression(tree->left,currentScope);
 
 
+    if (!type1) { 
+      return;
+    }
     char* exactType = (char*) malloc(sizeof(type1) + 1 );
     strcpy(exactType,type1);
     strcat(exactType," ");
 
-    if (!type1) { 
-      return;
-    }
 
     
     if (
