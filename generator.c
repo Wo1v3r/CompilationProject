@@ -225,6 +225,7 @@ char* generateTree(node* tree) {
 
 void generateCode(node* tree){
   generatedCode = (char*) malloc(10);
+  generatedCode[0] = '\0';
   generateTree(tree);
 
   printf("%s\n", generatedCode);
