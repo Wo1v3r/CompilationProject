@@ -49,7 +49,7 @@ void funcLabel(node* tree){
   funcCode->funcLabel = appendToFunction(label,funcName);
 }
 
-void addLabels(node* tree){
+void addLabels(node* tree) {
   if (strcmp(tree->token, "line") == 0) {
     char* freshLabel = createLabel(labelCount++);
     tree->nextLabel = freshLabel;

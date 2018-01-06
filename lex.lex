@@ -17,15 +17,15 @@
 "&&"      return AND;
 "&"       return REFERENCE;//
 "||"      return OR;
-"=="      return EQUALS;
-">="      return GEQUALS;
-"<="      return LEQUALS;
-">"       return GREATER;
-"<"       return LOWER;
+"=="      return EQUALS;//
+">="      return GEQUALS;//
+"<="      return LEQUALS;//
+">"       return GREATER;//
+"<"       return LOWER;//
 
 "!="      return NEQUALS;
-"!"       return NOT;
-"="       return ASSIGN;
+"!"       return NOT; // 
+"="       return ASSIGN; //
 
 "boolean" return BOOL;    
 "charp"   return CHARP;   
