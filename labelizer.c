@@ -1,5 +1,6 @@
 #include "semantics.c"
 void printTreeWithLabels(node* tree);
+void conditionLabel(node* tree);
 void booblean(node* tree);
 void orLabel(node* tree);
 void andLabel(node* tree);
@@ -42,6 +43,8 @@ void stmtLabel(node* tree, node* thenNode, node* elseNode){
   
   tree->trueLabel = thenLabel;
   tree->falseLabel = elseLabel;
+
+  conditionLabel(tree);
 }
 
 void funcLabel(node* tree){
@@ -55,9 +58,9 @@ void funcLabel(node* tree){
 
 
 void copyLabels(node* source, node* dest){
-  source->trueLabel = dest->trueLabel;
-  source->falseLabel = dest->falseLabel;
-  source->nextLabel = dest->nextLabel;
+  dest->trueLabel = source->trueLabel;
+  dest->falseLabel = source->falseLabel;
+  dest->nextLabel = source->nextLabel;
 }
 
 
@@ -82,7 +85,7 @@ void booblean(node* tree) {
 void printTreeWithCancer(node* tree) {
   printf("---(. )-<<cancer>>-( . )----:\n");
   printTreeWithLabels(tree);
-  printf("------<<cancer>>-------:\n"); 
+  printf("------<<cancer>>-------:\n");
 }
 
 void notLabel(node* tree) {
@@ -124,10 +127,19 @@ void andLabel(node* tree) {
 }
 
 void conditionLabel(node* tree) {
+  char* token = tree->token;
+  node* conditionNode = NULL;
 
-  copyLabels(tree->left,tree);
+  if (strcmp(token,"if") == 0) {
+    conditionNode = tree->left;
+  }
 
-  booblean(tree->left);
+  else if (strcmp(token,"while") == 0) {
+    printTree(tree);
+  }
+
+  copyLabels(tree, conditionNode);
+  booblean(conditionNode);
 };
 
 
@@ -166,7 +178,6 @@ void addLabels(node* tree) {
     if(tree->right->right)
       elseNode = tree -> right -> right;
     stmtLabel(tree, thenNode, elseNode);
-    conditionLabel(tree);
   }
   else if (strcmp(tree->token,"while") == 0) {
     node* cond = tree -> left;
