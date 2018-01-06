@@ -1,6 +1,6 @@
 #include "semantics.c"
 void printTreeWithLabels(node* tree);
-void conditionLabel(node* tree);
+void conditionLabel(node* tree, node* conditionNode);
 void booblean(node* tree);
 void orLabel(node* tree);
 void andLabel(node* tree);
@@ -43,8 +43,6 @@ void stmtLabel(node* tree, node* thenNode, node* elseNode){
   
   tree->trueLabel = thenLabel;
   tree->falseLabel = elseLabel;
-
-  conditionLabel(tree);
 }
 
 void funcLabel(node* tree){
@@ -126,18 +124,7 @@ void andLabel(node* tree) {
 
 }
 
-void conditionLabel(node* tree) {
-  char* token = tree->token;
-  node* conditionNode = NULL;
-
-  if (strcmp(token,"if") == 0) {
-    conditionNode = tree->left;
-  }
-
-  else if (strcmp(token,"while") == 0) {
-    printTree(tree);
-  }
-
+void conditionLabel(node* tree, node* conditionNode) {
   copyLabels(tree, conditionNode);
   booblean(conditionNode);
 };
@@ -178,11 +165,13 @@ void addLabels(node* tree) {
     if(tree->right->right)
       elseNode = tree -> right -> right;
     stmtLabel(tree, thenNode, elseNode);
+    conditionLabel(tree, tree->left);
   }
   else if (strcmp(tree->token,"while") == 0) {
     node* cond = tree -> left;
     node* dostmt = tree -> right;
     stmtLabel(tree, cond, dostmt);
+    conditionLabel(tree, cond);
   }
   else if (strcmp(tree->token,"do while") == 0) {
     node* dostmt = tree -> left;
@@ -193,6 +182,7 @@ void addLabels(node* tree) {
     node* cond = tree -> left -> right -> left;
     node* dostmt = tree -> right;
     stmtLabel(tree, cond, dostmt);
+    conditionLabel(tree, cond);
   }
 
   if (tree->left) addLabels(tree->left);

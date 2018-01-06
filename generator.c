@@ -85,6 +85,10 @@ int isMem(char* token) {
   return (strcmp(token,"[]") == 0);
 }
 
+int isControl(char* token) {
+  return (strcmp(token,"if") == 0);
+}
+
 int isReturn(char* token) {
   return (strcmp(token,"return") == 0);
 }
@@ -229,6 +233,23 @@ char* createFunction(node* tree) {
 }
 
 
+char* createIfLine(char* leftReg, node* tree) {
+  char* falseLabel = tree->left->falseLabel;
+  if (!falseLabel) 
+    falseLabel = tree->left->nextLabel;
+
+  int len = strlen("ifZ ") + strlen(falseLabel) + strlen(" Goto ") + strlen(leftReg);
+  char *line = (char*) malloc(len);
+
+  strcpy(line, "ifZ ");
+  strcat(line, leftReg);  
+  strcat(line, " Goto ");
+  strcat(line, falseLabel);
+  strcat(line, ":\n");
+
+  return line;
+}
+
 int shouldSkip(char* token) {
 
     int length = 1;
@@ -259,7 +280,7 @@ char* generateTree(node* tree) {
       return NULL;
     }
 
-    if (isFunctionDef(token)) {
+    else if (isFunctionDef(token)) {
       line = createFunction(tree);
       addLineToCode(line);
       beginIndex = strlen(generatedCode) - 1;
@@ -270,14 +291,70 @@ char* generateTree(node* tree) {
     if (isNumber(token)) { 
       return token;
     }
+
     if ( tree->left ) {
       leftReg = generateTree( tree->left);
+    }
+    
+    if (strcmp(token, "then, else") == 0) {
+
+      int len = 0;
+      char* trueLabel = NULL;
+      char* nextLabel = NULL;
+
+      if (tree->right) {
+        trueLabel = tree->right->trueLabel;
+        len += strlen(trueLabel);
+      }
+
+      if (tree->right) {
+        nextLabel = tree->right->nextLabel;
+        len += strlen(nextLabel);
+      }
+
+      char* tmp = (char*) malloc(len+14);
+      strcpy(tmp, "");
+
+      if (nextLabel) {
+        strcat(tmp, "Goto ");
+        strcat(tmp, nextLabel);
+        strcat(tmp, "\n");
+      }
+
+      if (trueLabel) {
+        strcat(tmp, trueLabel);
+        strcat(tmp, ": ");
+      }
+
+      addLineToCode(tmp);
+    }
+
+    if (isControl(token)) {
+      line = createIfLine(leftReg, tree);
+      addLineToCode(line);
     }
 
     if ( tree->right ) {
       rightReg = generateTree( tree->right);
     }
-    
+
+    if (isControl(token)) {
+      char* someLabel = NULL;
+      char* tmp = NULL;
+
+      if ( tree->right->right )
+        someLabel = tree->nextLabel;
+      else
+        someLabel = tree->falseLabel;
+
+      tmp =  (char*) malloc(strlen(someLabel) + 3);
+      strcpy(tmp, "");
+      strcat(tmp, someLabel);
+      strcat(tmp, ": ");
+
+      addLineToCode(tmp);
+    }
+
     if (isFunctionDef(token)) {
       insertBeginFunc(beginIndex, registerAccumalator);
       registerAccumalator = 0;
@@ -317,7 +394,6 @@ char* generateTree(node* tree) {
 
     else if (isMem(token)) {
       registerAccumalator += 2;      
-      //TODO: SHOULD NOT SHOW IF NOT IN ASSIGNMENT
       currentReg = createRegister();
       line = createMem(tree, &currentReg, leftReg, rightReg);
       addLineToCode(line);

@@ -236,14 +236,12 @@ num
     mainExists();
 
 
-    // printf("\n\nLabelizer:\n\n");
+    printf("\n\nLabelizer:\n\n");
     addLabels(tree);
-      printTreeWithCancer(tree);
+    printTreeWithCancer(tree);
 
-    // printTreeWithLabels(tree);
-
-    // printf("\n\nGenerator:\n\n");
-    // generateCode(tree);
+    printf("\n\nGenerator:\n\n");
+    generateCode(tree);
   }
 
   int main() {
