@@ -1,5 +1,9 @@
 #include "semantics.c"
 void printTreeWithLabels(node* tree);
+void booblean(node* tree);
+void orLabel(node* tree);
+void andLabel(node* tree);
+void notLabel(node* tree);
 
 char* createLabel(int lineNum){
     char num[6];
@@ -49,6 +53,85 @@ void funcLabel(node* tree){
   funcCode->funcLabel = appendToFunction(label,funcName);
 }
 
+
+void copyLabels(node* source, node* dest){
+  source->trueLabel = dest->trueLabel;
+  source->falseLabel = dest->falseLabel;
+  source->nextLabel = dest->nextLabel;
+}
+
+
+void booblean(node* tree) {
+  char* maybeOperator;
+
+  if (tree) {
+    maybeOperator = tree->token;
+    
+    if (strcmp(maybeOperator, "||") == 0) {
+      orLabel(tree);
+    }
+    else if (strcmp(maybeOperator, "&&") == 0) {
+      andLabel(tree);
+    }
+    else if (strcmp(maybeOperator, "!") == 0) {
+      notLabel(tree);
+    }
+  }
+}
+
+void printTreeWithCancer(node* tree) {
+  printf("---(. )-<<cancer>>-( . )----:\n");
+  printTreeWithLabels(tree);
+  printf("------<<cancer>>-------:\n"); 
+}
+
+void notLabel(node* tree) {
+  node* left = tree->left;
+
+  left->trueLabel = tree->falseLabel;
+  left->falseLabel = tree->trueLabel;
+
+  booblean(left);
+}
+
+void orLabel(node* tree) {
+  node* left = tree->left;
+  node* right = tree->right;
+
+  left->trueLabel = tree->trueLabel;
+  left->falseLabel = createLabel(labelCount++);
+  right->trueLabel = tree->trueLabel;
+  right->falseLabel = tree->falseLabel;
+
+  booblean(left);
+  booblean(right);
+
+}
+
+void andLabel(node* tree) {
+  node* left = tree->left;
+  node* right = tree->right;
+
+  left->falseLabel = tree->falseLabel;
+  left->trueLabel = createLabel(labelCount++);
+
+  right->falseLabel = tree->falseLabel;
+  right->trueLabel = tree->trueLabel;
+
+  booblean(left);
+  booblean(right);
+
+}
+
+void conditionLabel(node* tree) {
+
+  copyLabels(tree->left,tree);
+
+  booblean(tree->left);
+};
+
+
+
 void addLabels(node* tree) {
   if (strcmp(tree->token, "line") == 0) {
     char* freshLabel = createLabel(labelCount++);
@@ -83,6 +166,7 @@ void addLabels(node* tree) {
     if(tree->right->right)
       elseNode = tree -> right -> right;
     stmtLabel(tree, thenNode, elseNode);
+    conditionLabel(tree);
   }
   else if (strcmp(tree->token,"while") == 0) {
     node* cond = tree -> left;
