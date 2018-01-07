@@ -76,6 +76,14 @@ int isOP(char* token) {
     return 0;
 }
 
+int isOr(char* token) {
+  return (strcmp(token, "||") == 0);
+}
+
+int isAnd(char* token) {
+  return (strcmp(token, "&&") == 0);
+}
+
 int shouldSkip(char* token) {
 
     int length = 1;

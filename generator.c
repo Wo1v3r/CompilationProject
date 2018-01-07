@@ -1,6 +1,8 @@
 #include "labelizer.c"
-#include "codeFactory.c"
 #include "nodeIdentifier.c"
+char* generateTree(node* tree);
+#include "codeFactory.c"
+
 
 char* generateTree(node* tree) {
     char *token = tree->token;
@@ -13,7 +15,18 @@ char* generateTree(node* tree) {
       return NULL;
     }
 
-    else if (isFunctionDef(token)) {
+    if (isAnd(token)) {
+      rightReg = createAnd(tree);
+      return rightReg;
+    }
+
+
+    if (isOr(token)) {
+      rightReg = createOr(tree);
+      return rightReg;
+    }
+
+    if (isFunctionDef(token)) {
       line = createFunction(tree);
       addLineToCode(line);
       beginIndex = strlen(generatedCode) - 1;
@@ -21,11 +34,15 @@ char* generateTree(node* tree) {
       tree = tree->right->right;
     };
 
+
     if (isFunctionCall(token)) {
-      line = createFunctionCall(tree);
+      currentReg = createRegister();
+      line = createFunctionCall(tree,currentReg);
       addLineToCode(line);
-      return NULL;
+
+      return currentReg;
     }
+
 
     if (isNumber(token)) { 
       return token;

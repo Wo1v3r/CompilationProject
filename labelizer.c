@@ -73,6 +73,7 @@ void orLabel(node* tree) {
 
   left->trueLabel = tree->trueLabel;
   left->falseLabel = createLabel();
+
   right->trueLabel = tree->trueLabel;
   right->falseLabel = tree->falseLabel;
 

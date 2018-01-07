@@ -123,10 +123,12 @@ char* createVarLine(char* ident, char* currentReg){
 
 char* createIfLine(char* leftReg, node* tree) {
   char* falseLabel = tree->left->falseLabel;
-  if (!falseLabel) 
+  char* trueLabel = tree->left->trueLabel;
+
+  if (!falseLabel)
     falseLabel = tree->left->nextLabel;
 
-  int len = strlen("ifZ ") + strlen(falseLabel) + strlen(" Goto ") + strlen(leftReg) + 3;
+  int len = strlen("ifZ ") + strlen(falseLabel) +strlen(trueLabel) + strlen(" Goto   ") + strlen(leftReg) + 3;
   char *line = (char*) malloc(len);
 
   strcpy(line, "ifZ ");
@@ -134,7 +136,8 @@ char* createIfLine(char* leftReg, node* tree) {
   strcat(line, " Goto ");
   strcat(line, falseLabel);
   strcat(line, ":\n");
-
+  strcat(line, trueLabel);
+  strcat(line, ": ");  
   return line;
 }
 
@@ -343,10 +346,15 @@ char* createForGoto(node* tree){
 
 
 int funcCallByteSize(node* tree){
-  
+  int byteSizeCount = 0;
 
+  while(tree){
+    //FIXME: Should depend on type etc..
+    byteSizeCount++;
+    tree = tree->right;
+  }
 
-  return 1;
+  return byteSizeCount;
 }
 
 char* pushParams(node* tree){
@@ -354,12 +362,9 @@ char* pushParams(node* tree){
   char *line = (char*) malloc(len);
   char* push = "PushParam ";
 
-
   while(tree){
-    //FIXME: temp
-    char* reg = tree->left->token; //Should be a reg
+      char* reg = generateTree(tree->left);
 
-    //TODO:
       len = strlen(line) + strlen(push) + strlen(reg) + 2;
       line = (char*) realloc(line,len);
 
@@ -373,23 +378,65 @@ char* pushParams(node* tree){
   return line;
 };
 
-char* createFunctionCall(node* tree){
+char* createFunctionCall(node* tree, char* currentReg){
 
   char* funcName = tree->left->token;
-  int len = 4 + strlen("LCall _\n") + strlen("\nPopParams ") + strlen(funcName);
-  int callSize = funcCallByteSize(tree);
+  int len = 4 + strlen(currentReg) + strlen(" = LCall _\n") + strlen("\nPopParams ") + strlen(funcName);
+  int callSize = funcCallByteSize(tree->right);
   char num[6];
   sprintf(num, "%d", callSize);
 
   char *line = (char*) malloc(len);
-
-
   char* params = pushParams(tree->right);
+
   addLineToCode(params);
-  strcpy(line,"LCall _");
+
+  strcpy(line, currentReg);
+  strcat(line," = LCall _");
   strcat(line,funcName);
   strcat(line,"\nPopParams ");
   strcat(line,num);
+  strcat(line,"\n");
+  
 
   return line;
+}
+
+char* createAnd(node* tree) {
+  int len = 0;
+  char *line = NULL;
+
+  char* leftReg = generateTree(tree->left);
+  len = strlen(leftReg) +  strlen(tree->falseLabel) + strlen("Ifz    Goto \n") + 1;
+  line = (char*) malloc(len);
+  strcpy(line,"Ifz ");
+  strcat(line,leftReg);
+  strcat(line," Goto ");
+  strcat(line,tree->falseLabel);
+  strcat(line,"\n");
+  addLineToCode(line);
+  
+  char* rightReg = generateTree(tree->right);
+
+  return rightReg;
+}
+
+
+char* createOr(node* tree) {
+  int len = 0;
+  char *line = NULL;
+  char* leftReg = generateTree(tree->left);
+
+  len = strlen(leftReg) +  strlen(tree->trueLabel) + strlen("If    Goto \n") + 1;
+  line = (char*) malloc(len);
+
+  strcpy(line,"If ");
+  strcat(line,leftReg);
+  strcat(line," Goto ");
+  strcat(line,tree->trueLabel);
+  strcat(line,"\n");
+  addLineToCode(line);
+  
+  char* rightReg = generateTree(tree->right);
+  return rightReg;
 }
