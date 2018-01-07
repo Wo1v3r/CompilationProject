@@ -1,7 +1,7 @@
 #include "semantics.c"
 void printTreeWithLabels(node* tree);
 void conditionLabel(node* tree, node* conditionNode);
-void booblean(node* tree);
+void labelBoolean(node* tree);
 void orLabel(node* tree);
 void andLabel(node* tree);
 void notLabel(node* tree);
@@ -62,7 +62,7 @@ void copyLabels(node* source, node* dest){
 }
 
 
-void booblean(node* tree) {
+void labelBoolean(node* tree) {
   char* maybeOperator;
 
   if (tree) {
@@ -80,19 +80,13 @@ void booblean(node* tree) {
   }
 }
 
-void printTreeWithCancer(node* tree) {
-  printf("---(. )-<<cancer>>-( . )----:\n");
-  printTreeWithLabels(tree);
-  printf("------<<cancer>>-------:\n");
-}
-
 void notLabel(node* tree) {
   node* left = tree->left;
 
   left->trueLabel = tree->falseLabel;
   left->falseLabel = tree->trueLabel;
 
-  booblean(left);
+  labelBoolean(left);
 }
 
 void orLabel(node* tree) {
@@ -104,8 +98,8 @@ void orLabel(node* tree) {
   right->trueLabel = tree->trueLabel;
   right->falseLabel = tree->falseLabel;
 
-  booblean(left);
-  booblean(right);
+  labelBoolean(left);
+  labelBoolean(right);
 
 }
 
@@ -119,17 +113,14 @@ void andLabel(node* tree) {
   right->falseLabel = tree->falseLabel;
   right->trueLabel = tree->trueLabel;
 
-  booblean(left);
-  booblean(right);
-
+  labelBoolean(left);
+  labelBoolean(right);
 }
 
 void conditionLabel(node* tree, node* conditionNode) {
   copyLabels(tree, conditionNode);
-  booblean(conditionNode);
+  labelBoolean(conditionNode);
 };
-
-
 
 void addLabels(node* tree) {
   if (strcmp(tree->token, "line") == 0) {
@@ -152,7 +143,6 @@ void addLabels(node* tree) {
       else if (strcmp(tree->left->token, "for") == 0) {
         tree->left->nextLabel = tree->nextLabel;
       }
-
     }
   }
 
@@ -191,7 +181,6 @@ void addLabels(node* tree) {
 
 void printTreeWithLabels(node* tree){
   char* token = tree->token;
-
 
   if (shouldTab(token)){
     if(tree->funcLabel) printf("FuncLabel: %s\n", tree->funcLabel);

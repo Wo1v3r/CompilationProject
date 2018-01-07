@@ -238,7 +238,7 @@ num
 
     printf("\n\nLabelizer:\n\n");
     addLabels(tree);
-    printTreeWithCancer(tree);
+    printTreeWithLabels(tree);
 
     printf("\n\nGenerator:\n\n");
     generateCode(tree);
