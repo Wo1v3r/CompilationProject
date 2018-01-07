@@ -121,15 +121,12 @@ char* createVarLine(char* ident, char* currentReg){
   return line;
 }
 
-
-
-
 char* createIfLine(char* leftReg, node* tree) {
   char* falseLabel = tree->left->falseLabel;
   if (!falseLabel) 
     falseLabel = tree->left->nextLabel;
 
-  int len = strlen("ifZ ") + strlen(falseLabel) + strlen(" Goto ") + strlen(leftReg);
+  int len = strlen("ifZ ") + strlen(falseLabel) + strlen(" Goto ") + strlen(leftReg) + 3;
   char *line = (char*) malloc(len);
 
   strcpy(line, "ifZ ");
@@ -187,5 +184,159 @@ char* endFunction(){
 
   strcpy(line, end);
   strcat(line, "\n");  
+  return line;
+}
+
+char* beginWhile(node* tree, char* leftReg) {
+  char* trueLabel = tree->trueLabel;
+  char* falseLabel = tree->falseLabel;
+  
+  int len =  
+      strlen(trueLabel) 
+    + strlen(": ifZ ") 
+    + strlen(leftReg)
+    + strlen(" Goto ")
+    + strlen(falseLabel);
+
+  char *line = (char*) malloc(len + 2);
+
+  strcpy(line, trueLabel);
+  strcat(line, ": ifZ ");
+  strcat(line, leftReg);
+  strcat(line, " Goto ");
+  strcat(line, falseLabel);
+  strcat(line, "\n");
+  return line;
+}
+
+char* endWhile(node* tree) {
+
+  char* trueLabel = tree->trueLabel;
+  char* falseLabel = tree->falseLabel;
+  
+  int len = 5 + strlen("Goto ") + strlen(trueLabel) + strlen(falseLabel);
+  char *line = (char*) malloc(len);
+
+  strcpy(line, "Goto ");
+  strcat(line, trueLabel);
+  strcat(line, "\n");
+  strcat(line, falseLabel);  
+  strcat(line, ": ");
+
+  return line;
+}
+
+
+char* beginDoWhile(node* tree, char* leftReg) {
+  char* trueLabel = tree->trueLabel;
+  
+  int len =  
+      strlen(trueLabel) 
+    + strlen(": ");
+
+  char *line = (char*) malloc(len + 1);
+
+  strcpy(line, trueLabel);
+  strcat(line, ": ");
+  return line;
+}
+
+char* endDoWhile(node* tree, char* leftReg) {
+
+  char* trueLabel = tree->trueLabel;
+  
+  int len = 1 + strlen("If  Goto \n") + strlen(trueLabel) + strlen(leftReg);
+  char *line = (char*) malloc(len);
+
+  strcpy(line, "If ");
+  strcat(line, leftReg);
+  strcat(line, " Goto ");
+  strcat(line, trueLabel);  
+  strcat(line, "\n");
+
+  return line;
+}
+
+char* addGonetoLabel(node* tree)  {
+    char* someLabel = NULL;
+    char* line = NULL;
+
+    if ( tree->right->right )
+      someLabel = tree->nextLabel;
+    else
+      someLabel = tree->falseLabel;
+
+    line = (char*) malloc(strlen(someLabel) + 3);
+    strcpy(line, "");
+    strcat(line, someLabel);
+    strcat(line, ": ");
+
+    return line;
+}
+
+
+char* addThenElseGoto(node* tree){
+    int len = 0;
+    char* trueLabel = NULL;
+    char* nextLabel = NULL;
+
+    if (tree->right) {
+      trueLabel = tree->right->trueLabel;
+      len += strlen(trueLabel);
+    }
+
+    if (tree->right) {
+      nextLabel = tree->right->nextLabel;
+      len += strlen(nextLabel);
+    }
+
+    char* tmp = (char*) malloc(len + 7);
+    strcpy(tmp, "");
+
+    if (nextLabel) {
+      strcat(tmp, "Goto ");
+      strcat(tmp, nextLabel);
+      strcat(tmp, "\n");
+    }
+
+    if (trueLabel) {
+      strcat(tmp, trueLabel);
+      strcat(tmp, ": ");
+    }
+
+    return tmp;
+}
+
+char* createForCond(node* tree, char* condReg) {
+  char* trueLabel = tree->trueLabel;
+  int len = 1 + strlen(": ") + strlen(trueLabel);
+  char *line = (char*) malloc(len);
+
+  strcpy(line, trueLabel);
+  strcat(line, ": ");
+
+  addLineToCode(line);
+
+  line = createIfLine(condReg, tree->left->right);
+  return line;
+}
+
+char* createForGoto(node* tree){
+
+  char* trueLabel = tree->trueLabel;
+  char* falseLabel = tree->left->right->left->falseLabel;
+
+  if (!falseLabel) 
+    falseLabel = tree->left->right->left->nextLabel;
+
+  int len = 1 + strlen("Goto :   \n") + strlen(trueLabel) + strlen(falseLabel);
+  char *line = (char*) malloc(len);
+
+  strcpy(line, "Goto ");
+  strcat(line, trueLabel);
+  strcat(line," \n");
+  strcat(line,falseLabel);  
+  strcat(line,": ");  
+
   return line;
 }

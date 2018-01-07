@@ -25,45 +25,42 @@ char* generateTree(node* tree) {
       return token;
     }
 
+    if (isFor(token)) {
+      char* initReg = generateTree(tree->left->left->left);
+      char* condReg = generateTree(tree->left->right->left->left);
+
+      line = createForCond(tree, condReg);
+      addLineToCode(line);
+
+      generateTree(tree->right);
+      char* updateReg = generateTree(tree->left->right->right);
+
+      line = createForGoto(tree);
+      addLineToCode(line);
+      return NULL;
+    }
+
     if ( tree->left ) {
       leftReg = generateTree( tree->left);
     }
     
-    if (strcmp(token, "then, else") == 0) {
-
-      int len = 0;
-      char* trueLabel = NULL;
-      char* nextLabel = NULL;
-
-      if (tree->right) {
-        trueLabel = tree->right->trueLabel;
-        len += strlen(trueLabel);
-      }
-
-      if (tree->right) {
-        nextLabel = tree->right->nextLabel;
-        len += strlen(nextLabel);
-      }
-
-      char* tmp = (char*) malloc(len+14);
-      strcpy(tmp, "");
-
-      if (nextLabel) {
-        strcat(tmp, "Goto ");
-        strcat(tmp, nextLabel);
-        strcat(tmp, "\n");
-      }
-
-      if (trueLabel) {
-        strcat(tmp, trueLabel);
-        strcat(tmp, ": ");
-      }
-
-      addLineToCode(tmp);
+    if (isThenElse(token)) {
+      line = addThenElseGoto(tree);
+      addLineToCode(line);
     }
 
-    if (isControl(token)) {
+    if (isIf(token)) {
       line = createIfLine(leftReg, tree);
+      addLineToCode(line);
+    }
+
+    if (isWhile(token)) {
+      line = beginWhile(tree, leftReg);
+      addLineToCode(line);
+    }
+
+    if (isDoWhile(token )) {
+      line = beginDoWhile(tree, leftReg);
       addLineToCode(line);
     }
 
@@ -71,21 +68,19 @@ char* generateTree(node* tree) {
       rightReg = generateTree( tree->right);
     }
 
-    if (isControl(token)) {
-      char* someLabel = NULL;
-      char* tmp = NULL;
+    if (isWhile(token)) {
+      line = endWhile(tree);
+      addLineToCode(line);
+    }
 
-      if ( tree->right->right )
-        someLabel = tree->nextLabel;
-      else
-        someLabel = tree->falseLabel;
+    if (isDoWhile(token )) {
+      line = endDoWhile(tree, leftReg);
+      addLineToCode(line);
+    }
 
-      tmp =  (char*) malloc(strlen(someLabel) + 3);
-      strcpy(tmp, "");
-      strcat(tmp, someLabel);
-      strcat(tmp, ": ");
-
-      addLineToCode(tmp);
+    if (isIf(token)) {
+      line = addGonetoLabel(tree);
+      addLineToCode(line);
     }
 
     if (isFunctionDef(token)) {
@@ -132,7 +127,6 @@ char* generateTree(node* tree) {
       addLineToCode(line);
     }
 
-    // if (line) addLineToCode(line);
     return currentReg;
 }
 

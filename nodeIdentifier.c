@@ -1,6 +1,5 @@
 int isNumber(char* token) {
     if (strcmp(token,"0") == 0) return 1;
-
     if (atoi(token)) return 1;
 
     return 0;
@@ -14,8 +13,24 @@ int isMem(char* token) {
   return (strcmp(token,"[]") == 0);
 }
 
-int isControl(char* token) {
+int isIf(char* token) {
   return (strcmp(token,"if") == 0);
+}
+
+int isWhile(char* token ) {
+  return (strcmp(token, "while") == 0);
+}
+
+int isDoWhile(char* token) {
+  return (strcmp(token, "do while") == 0);
+}
+
+int isThenElse(char* token) {
+  return (strcmp(token, "then, else") == 0);
+}
+
+int isFor(char* token){
+  return (strcmp(token, "for") == 0);
 }
 
 int isReturn(char* token) {
