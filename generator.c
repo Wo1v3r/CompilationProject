@@ -21,6 +21,12 @@ char* generateTree(node* tree) {
       tree = tree->right->right;
     };
 
+    if (isFunctionCall(token)) {
+      line = createFunctionCall(tree);
+      addLineToCode(line);
+      return NULL;
+    }
+
     if (isNumber(token)) { 
       return token;
     }

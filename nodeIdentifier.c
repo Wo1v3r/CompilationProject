@@ -9,6 +9,10 @@ int isFunctionDef(char* token) {
   return (strcmp(token,"function def") == 0);
 }
 
+int isFunctionCall(char* token) {
+  return (strcmp(token,"function call") == 0);
+}
+
 int isMem(char* token) {
   return (strcmp(token,"[]") == 0);
 }

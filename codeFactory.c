@@ -340,3 +340,56 @@ char* createForGoto(node* tree){
 
   return line;
 }
+
+
+int funcCallByteSize(node* tree){
+  
+
+
+  return 1;
+}
+
+char* pushParams(node* tree){
+  int len = 1;
+  char *line = (char*) malloc(len);
+  char* push = "PushParam ";
+
+
+  while(tree){
+    //FIXME: temp
+    char* reg = tree->left->token; //Should be a reg
+
+    //TODO:
+      len = strlen(line) + strlen(push) + strlen(reg) + 2;
+      line = (char*) realloc(line,len);
+
+      strcat(line,push);
+      strcat(line,reg);
+      strcat(line, "\n");
+
+    tree = tree->right;
+  }
+
+  return line;
+};
+
+char* createFunctionCall(node* tree){
+
+  char* funcName = tree->left->token;
+  int len = 4 + strlen("LCall _\n") + strlen("\nPopParams ") + strlen(funcName);
+  int callSize = funcCallByteSize(tree);
+  char num[6];
+  sprintf(num, "%d", callSize);
+
+  char *line = (char*) malloc(len);
+
+
+  char* params = pushParams(tree->right);
+  addLineToCode(params);
+  strcpy(line,"LCall _");
+  strcat(line,funcName);
+  strcat(line,"\nPopParams ");
+  strcat(line,num);
+
+  return line;
+}

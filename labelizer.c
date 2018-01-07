@@ -26,12 +26,11 @@ void statementLabel(node* tree, node* thenNode, node* elseNode){
 }
 
 void funcLabel(node* tree){
-  char* label = createLabel();
   char* funcName = tree->left->right->token;
 
   node* funcCode= tree->right->right;
 
-  funcCode->funcLabel = appendToFunction(label,funcName);
+  funcCode->funcLabel = appendToFunction(funcName);
 }
 
 

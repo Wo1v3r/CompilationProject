@@ -1,6 +1,6 @@
 
 char* createLabel();
-char* appendToFunction(char* label, char* funcName);
+char* appendToFunction(char* funcName);
 
 
 int labelCount = 0;
@@ -15,12 +15,11 @@ char* createLabel(){
     return label;
 }
 
-char* appendToFunction(char* label, char* funcName){
-  char* newLabel = (char*)malloc(strlen(label)+strlen(funcName) + 2 );
+char* appendToFunction(char* funcName){
+  char* newLabel = (char*)malloc(strlen(funcName) + 2 );
 
-  strcpy(newLabel,funcName);
-  strcat(newLabel,"_");
-  strcat(newLabel,label);
+  strcpy(newLabel,"_");
+  strcat(newLabel,funcName);
 
   return newLabel;
 }
