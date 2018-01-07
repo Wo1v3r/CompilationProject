@@ -3,7 +3,6 @@
 #include "nodeIdentifier.c"
 
 char* generateTree(node* tree) {
-    static int registerAccumalator = 0;
     char *token = tree->token;
     char *line = NULL;
     char *currentReg = NULL, *leftReg = NULL, *rightReg = NULL;
@@ -90,8 +89,7 @@ char* generateTree(node* tree) {
     }
 
     if (isFunctionDef(token)) {
-      insertBeginFunc(beginIndex, registerAccumalator);
-      registerAccumalator = 0;
+      insertBeginFunc(beginIndex);
       line = endFunction();
       addLineToCode(line);
       tabCount--;
@@ -104,21 +102,18 @@ char* generateTree(node* tree) {
     }
 
     else if (isOP(token)) {
-      registerAccumalator++;      
       currentReg = createRegister();
       line = createOP(token,currentReg, leftReg, rightReg);
       addLineToCode(line);
     }
 
     else if (isUNAR(token)) {
-      registerAccumalator++;
       currentReg = createRegister();
       line = createUNAR(token,currentReg,leftReg);
       addLineToCode(line);
     }
 
     else if (isNotKeyword(token) && isIdent(token)) {
-      registerAccumalator++;
       currentReg = createRegister();
       line = createVarLine(token, currentReg);
       addLineToCode(line);
@@ -126,8 +121,7 @@ char* generateTree(node* tree) {
       return currentReg;
     }
 
-    else if (isMem(token)) {
-      registerAccumalator += 2;      
+    else if (isMem(token)) {   
       currentReg = createRegister();
       line = createMem(tree, &currentReg, leftReg, rightReg);
       addLineToCode(line);

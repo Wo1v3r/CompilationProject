@@ -1,6 +1,7 @@
 char* generatedCode;
 int registerCount = 0;
 int tabCount = 0;
+int registerAccumalator = 0;
 
 char* createRegister(){
     char num[6];
@@ -9,6 +10,7 @@ char* createRegister(){
     strcpy(reg, "_t");
     strcat(reg, num);
 
+    registerAccumalator++;
     return reg;
 }
 
@@ -163,7 +165,7 @@ char* beginFunction(int size){
 }
 
 
-char* insertBeginFunc(int index, int size) {
+char* insertBeginFunc(int index) {
     
   char* rest = generatedCode + index + tabCount + 1;
   char* temp = (char*) malloc(strlen(rest) + 1);
@@ -172,9 +174,10 @@ char* insertBeginFunc(int index, int size) {
 
   generatedCode[index + 1] = '\0';
 
-  addLineToCode(beginFunction(size));
+  addLineToCode(beginFunction(registerAccumalator));
   addLineToCode(temp);
 
+  registerAccumalator = 0;
   return generatedCode;
 }
 
