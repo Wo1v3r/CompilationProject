@@ -1,4 +1,6 @@
 #include "semantics.c"
+#include "labelFactory.c"
+
 void printTreeWithLabels(node* tree);
 void conditionLabel(node* tree, node* conditionNode);
 void labelBoolean(node* tree);
@@ -6,32 +8,10 @@ void orLabel(node* tree);
 void andLabel(node* tree);
 void notLabel(node* tree);
 
-char* createLabel(int lineNum){
-    char num[6];
-    sprintf(num, "%d", lineNum);
-    char* label = (char*)malloc(2+strlen(num));
-    strcpy(label, "L");
-    strcat(label, num);
-
-    return label;
-}
-
-char* appendToFunction(char* label, char* funcName){
-  char* newLabel = (char*)malloc(strlen(label)+strlen(funcName) + 2 );
-
-  strcpy(newLabel,funcName);
-  strcat(newLabel,"_");
-  strcat(newLabel,label);
-
-  return newLabel;
-}
-
-int labelCount = 0;
-
 void statementLabel(node* tree, node* thenNode, node* elseNode){
 
-  char* thenLabel = createLabel(labelCount++);
-  char* elseLabel = createLabel(labelCount++);
+  char* thenLabel = createLabel();
+  char* elseLabel = createLabel();
 
   thenNode->trueLabel = thenLabel;
   if (elseNode)
@@ -46,7 +26,7 @@ void statementLabel(node* tree, node* thenNode, node* elseNode){
 }
 
 void funcLabel(node* tree){
-  char* label = createLabel(labelCount++);
+  char* label = createLabel();
   char* funcName = tree->left->right->token;
 
   node* funcCode= tree->right->right;
@@ -60,7 +40,6 @@ void copyLabels(node* source, node* dest){
   dest->falseLabel = source->falseLabel;
   dest->nextLabel = source->nextLabel;
 }
-
 
 void labelBoolean(node* tree) {
   char* maybeOperator;
@@ -94,7 +73,7 @@ void orLabel(node* tree) {
   node* right = tree->right;
 
   left->trueLabel = tree->trueLabel;
-  left->falseLabel = createLabel(labelCount++);
+  left->falseLabel = createLabel();
   right->trueLabel = tree->trueLabel;
   right->falseLabel = tree->falseLabel;
 
@@ -108,7 +87,7 @@ void andLabel(node* tree) {
   node* right = tree->right;
 
   left->falseLabel = tree->falseLabel;
-  left->trueLabel = createLabel(labelCount++);
+  left->trueLabel = createLabel();
 
   right->falseLabel = tree->falseLabel;
   right->trueLabel = tree->trueLabel;
@@ -124,7 +103,7 @@ void conditionLabel(node* tree, node* conditionNode) {
 
 void addLabels(node* tree) {
   if (strcmp(tree->token, "line") == 0) {
-    char* freshLabel = createLabel(labelCount++);
+    char* freshLabel = createLabel();
     tree->nextLabel = freshLabel;
     if (tree->right)
       tree->right->trueLabel = freshLabel;
@@ -180,22 +159,4 @@ void addLabels(node* tree) {
 
   if (tree->left) addLabels(tree->left);
   if (tree->right) addLabels(tree->right);
-}
-
-void printTreeWithLabels(node* tree){
-  char* token = tree->token;
-
-  if (shouldTab(token)){
-    if(tree->funcLabel) printf("FuncLabel: %s\n", tree->funcLabel);
-    if(tree->trueLabel) printf("Labels: True: %s False: %s Next: %s\n", tree->trueLabel,tree->falseLabel, tree->nextLabel);
-    printf("%s\n", token);
-  }
-
-  if ( tree->left ) {
-    printTreeWithLabels( tree->left );
-  }
-
-  if ( tree->right ) {
-    printTreeWithLabels( tree->right );
-  }
 }

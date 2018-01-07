@@ -1,4 +1,3 @@
-
   #include "structs.c"
   
   void tab(int times) {
@@ -65,6 +64,24 @@
       }
 
       list = list->next;
+    }
+  }
+
+  void printTreeWithLabels(node* tree){
+    char* token = tree->token;
+
+    if (shouldTab(token)){
+      if(tree->funcLabel) printf("FuncLabel: %s\n", tree->funcLabel);
+      if(tree->trueLabel) printf("Labels: True: %s False: %s Next: %s\n", tree->trueLabel,tree->falseLabel, tree->nextLabel);
+      printf("%s\n", token);
+    }
+
+    if ( tree->left ) {
+      printTreeWithLabels( tree->left );
+    }
+
+    if ( tree->right ) {
+      printTreeWithLabels( tree->right );
     }
   }
 
