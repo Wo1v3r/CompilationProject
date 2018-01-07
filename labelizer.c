@@ -28,7 +28,7 @@ char* appendToFunction(char* label, char* funcName){
 
 int labelCount = 0;
 
-void stmtLabel(node* tree, node* thenNode, node* elseNode){
+void statementLabel(node* tree, node* thenNode, node* elseNode){
 
   char* thenLabel = createLabel(labelCount++);
   char* elseLabel = createLabel(labelCount++);
@@ -151,27 +151,30 @@ void addLabels(node* tree) {
   }
   else if (strcmp(tree->token,"if") == 0) {
     node* thenNode = tree -> right -> left;
-    node* elseNode = NULL;
-    if(tree->right->right)
-      elseNode = tree -> right -> right;
-    stmtLabel(tree, thenNode, elseNode);
+    node* elseNode = tree -> right -> right;
+
+    statementLabel(tree, thenNode, elseNode);
     conditionLabel(tree, tree->left);
   }
   else if (strcmp(tree->token,"while") == 0) {
     node* cond = tree -> left;
-    node* dostmt = tree -> right;
-    stmtLabel(tree, cond, dostmt);
+    node* doNode = tree -> right;
+
+    statementLabel(tree, cond, doNode);
     conditionLabel(tree, cond);
   }
   else if (strcmp(tree->token,"do while") == 0) {
-    node* dostmt = tree -> left;
+    node* doNode = tree -> left;
     node* cond = tree -> right;
-    stmtLabel(tree, cond, dostmt);
+
+    statementLabel(tree, cond, doNode);
+    conditionLabel(tree, cond);
   }
   else if (strcmp(tree->token,"for") == 0) {
     node* cond = tree -> left -> right -> left;
-    node* dostmt = tree -> right;
-    stmtLabel(tree, cond, dostmt);
+    node* doNode = tree -> right;
+
+    statementLabel(tree, cond, doNode);
     conditionLabel(tree, cond);
   }
 
