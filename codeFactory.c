@@ -435,8 +435,19 @@ char* createOr(node* tree) {
   strcat(line," Goto ");
   strcat(line,tree->trueLabel);
   strcat(line,"\n");
+
   addLineToCode(line);
   
+  if(isAnd(tree->left->token)) {
+    int len2 = strlen(tree->left->falseLabel) + strlen(": ") + 1;
+    char* line2 = (char*) malloc(len2);
+
+    strcpy(line2, tree->left->falseLabel);
+    strcat(line2, ": ");
+    addLineToCode(line2);
+  }
+
   char* rightReg = generateTree(tree->right);
+
   return rightReg;
 }
