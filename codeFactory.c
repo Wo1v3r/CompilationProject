@@ -123,7 +123,7 @@ char* createVarLine(char* ident, char* currentReg){
 
 char* createIfLine(char* leftReg, node* tree) {
   char* falseLabel = tree->left->falseLabel;
-  char* trueLabel = tree->left->trueLabel;
+  char* trueLabel = tree->right->left->trueLabel;
 
   if (!falseLabel)
     falseLabel = tree->left->nextLabel;
@@ -310,6 +310,28 @@ char* addThenElseGoto(node* tree){
     return tmp;
 }
 
+
+
+char* createForCondLine(char* leftReg, node* tree) {
+  char* falseLabel = tree->left->falseLabel;
+  char* trueLabel = tree->left->trueLabel;
+
+  if (!falseLabel)
+    falseLabel = tree->left->nextLabel;
+
+  int len = strlen("ifZ ") + strlen(falseLabel) +strlen(trueLabel) + strlen(" Goto   ") + strlen(leftReg) + 3;
+  char *line = (char*) malloc(len);
+
+  strcpy(line, "ifZ ");
+  strcat(line, leftReg);  
+  strcat(line, " Goto ");
+  strcat(line, falseLabel);
+  strcat(line, ":\n");
+  strcat(line, trueLabel);
+  strcat(line, ": ");  
+  return line;
+}
+
 char* createForCond(node* tree, char* condReg) {
   char* trueLabel = tree->trueLabel;
   int len = 1 + strlen(": ") + strlen(trueLabel);
@@ -320,7 +342,7 @@ char* createForCond(node* tree, char* condReg) {
 
   addLineToCode(line);
 
-  line = createIfLine(condReg, tree->left->right);
+  line = createForCondLine(condReg, tree->left->right);
   return line;
 }
 

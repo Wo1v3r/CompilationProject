@@ -21,7 +21,9 @@ void statementLabel(node* tree, node* thenNode, node* elseNode){
   if (elseNode)
     elseNode->nextLabel = tree->nextLabel;
   
-  tree->trueLabel = thenLabel;
+  if (!tree->trueLabel)
+    tree->trueLabel = thenLabel;
+
   tree->falseLabel = elseLabel;
 }
 
@@ -134,6 +136,11 @@ void addLabels(node* tree) {
 
     statementLabel(tree, thenNode, elseNode);
     conditionLabel(tree, tree->left);
+
+    if (strcmp(tree->right->token, "if") == 0) {
+      tree->right->nextLabel = tree->nextLabel;
+      tree->right->trueLabel = tree->falseLabel;
+    }
   }
   else if (strcmp(tree->token,"while") == 0) {
     node* cond = tree -> left;
