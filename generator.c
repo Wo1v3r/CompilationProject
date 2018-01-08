@@ -50,6 +50,15 @@ char* generateTree(node* tree) {
 
     if (isFor(token)) {
       char* initReg = generateTree(tree->left->left->left);
+
+      char* trueLabel = tree->trueLabel;
+      int len = 1 + strlen(": ") + strlen(trueLabel);
+      
+      line = (char*) malloc(len);
+      strcpy(line, trueLabel);
+      strcat(line, ": ");
+      addLineToCode(line);
+
       char* condReg = generateTree(tree->left->right->left->left);
 
       line = createForCond(tree, condReg);

@@ -235,6 +235,10 @@ num
     semantizeTree(tree, globalScope);
     mainExists();
 
+    if (errorFlag) {
+      printf("Semantics Failed! exiting...\n\n");
+      exit(1);
+    }
 
     printf("\n\nLabelizer:\n\n");
     addLabels(tree);

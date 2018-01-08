@@ -326,24 +326,12 @@ char* createForCondLine(char* leftReg, node* tree) {
   strcat(line, leftReg);  
   strcat(line, " Goto ");
   strcat(line, falseLabel);
-  strcat(line, ":\n");
-  strcat(line, trueLabel);
-  strcat(line, ": ");  
+  strcat(line, ":\n"); 
   return line;
 }
 
 char* createForCond(node* tree, char* condReg) {
-  char* trueLabel = tree->trueLabel;
-  int len = 1 + strlen(": ") + strlen(trueLabel);
-  char *line = (char*) malloc(len);
-
-  strcpy(line, trueLabel);
-  strcat(line, ": ");
-
-  addLineToCode(line);
-
-  line = createForCondLine(condReg, tree->left->right);
-  return line;
+  return createForCondLine(condReg, tree->left->right);
 }
 
 char* createForGoto(node* tree){
