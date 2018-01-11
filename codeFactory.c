@@ -389,17 +389,21 @@ char* pushParams(node* tree){
 };
 
 char* createFunctionCall(node* tree, char* currentReg){
-
+  char* params = NULL;
   char* funcName = tree->left->token;
   int len = 4 + strlen(currentReg) + strlen(" = LCall _\n") + strlen("\nPopParams ") + strlen(funcName);
   int callSize = funcCallByteSize(tree->right);
   char num[6];
+
   sprintf(num, "%d", callSize);
 
   char *line = (char*) malloc(len);
-  char* params = pushParams(tree->right);
 
-  addLineToCode(params);
+  if (strcmp(tree->right->token, " ") != 0) {
+    params = pushParams(tree->right);
+    addLineToCode(params);
+  }
+
 
   strcpy(line, currentReg);
   strcat(line," = LCall _");
